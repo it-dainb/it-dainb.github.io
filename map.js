@@ -1,4 +1,4 @@
-const plugin = ({widgets, simulator, vehicle}) => {
+const map = ({widgets, simulator, vehicle}) => {
     widgets.register("map", (box) => {
         const div = document.createElement("div");
         div.innerHTML = "Hello World";
@@ -7,4 +7,4 @@ const plugin = ({widgets, simulator, vehicle}) => {
     })
 }
 
-export default plugin;
+export default map;
