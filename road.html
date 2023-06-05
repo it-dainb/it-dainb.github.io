@@ -1,42 +1,7 @@
-class Car {
-    constructor(x, y, direction, color) {
-      this.x = x;
-      this.y = y;
-      this.direction = direction;
-      this.element = document.getElementById("Car");
-      this.totalRotation = 0;
-      this.color = color;
-      this.element.style.backgroundColor = this.color;
-    }
-    
-    moveCarUp(vel) {
-    // Calculate the new top and left positions based on the rotation angle
-        const radians = totalRotation * (Math.PI / 180) * -1; // Convert the angle to radians
-        const topOffset = Math.sin(radians) * vel;
-        const leftOffset = Math.cos(radians) * vel;
-
-        // Update the top and left positions
-        const currentTop = parseInt(window.getComputedStyle(this.element).getPropertyValue("top"));
-        const currentLeft = parseInt(window.getComputedStyle(this.element).getPropertyValue("left"));
-        this.element.style.top = (currentTop - topOffset) + "px";
-        this.element.style.left = (currentLeft + leftOffset) + "px";
-    }
-  
-    turnRight() {
-        this.totalRotation += 90
-        this.element.style.transform = "rotate(" +  this.totalRotation + "deg)";
-    }
-    
-    turnLeft() {
-        this.totalRotation -= 90
-        this.element.style.transform = "rotate(" + this.totalRotation + "deg)";
-    }
-}
-
-const plugin = ({ widgets, simulator, vehicle }) => {
-    const div = document.createElement("div");
-    div.innerHTML = `
-    <style>
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
     /* Style for the road */
     .road-horizontal {
       width: 100%;
@@ -108,7 +73,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
 
 
     .traffic-light {
-        width: 4.5%;
+        width: 2%;
         height: 70px;
         background-color: black;
         border-radius: 10px;
@@ -121,7 +86,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
         transform: rotate(180deg);
     }
     .light {
-        width: 75%;
+        width: 70%;
         height: 70%;
         border-radius: 50%;
         background-color: gray; /* Set default background color */
@@ -158,21 +123,20 @@ const plugin = ({ widgets, simulator, vehicle }) => {
         transform: rotate(0deg);
     }
 
-    
     .note span {
         white-space: nowrap;
         display: flex;
         align-items: center;
         justify-content: left;
         width: 5.5%; /* Adjust the width to your preference */
-        height: 40px; /* Adjust the height to your preference */
+        height: 70px; /* Adjust the height to your preference */
         border-radius: 50%;
       }
       
       .bold-text {
         font-weight: bold;
-        font-size: 20px;
-        margin-left: 40px;
+        font-size: 30px;
+        margin-left: 89px;
       }
       
       .my-car-color {
@@ -184,14 +148,16 @@ const plugin = ({ widgets, simulator, vehicle }) => {
         background-color: green;
         text-align: right;
       }
-</style>
-<div class="note">
-<span class="my-car-color"><span class="bold-text">My car</span></span>
-<br>
-<span class="another-car-color"><span class="bold-text">Another car</span></span>
-</div>
 
-<div class="road-horizontal">
+</style>
+</head>
+<body>
+    <div class="note">
+        <span class="my-car-color"><span class="bold-text">My car</span></span>
+        <br>
+        <span class="another-car-color"><span class="bold-text">Another car</span></span>
+    </div>
+    <div class="road-horizontal">
         <div class="traffic-light">
             <div class="light green"></div>
             <div class="light yellow"></div>
@@ -217,16 +183,40 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     <div class="road-vertical"></div>
     <div class="road-markings-vertical"></div>
     <div class="road-markings-horizontal"></div>
-    <span id="Car" class="my-car">
+    <span class="my-car">
         <div class="car-head"></div>
     </span>
-  
-    `;
+    
 
-    // Append the div to the document body
-    document.body.appendChild(div);
+<script>
+    // JavaScript code to change the car's position
+    var car = document.querySelector(".my-car");
+    var totalRotation = 0; // Track the total rotation angle
 
-    const myCar = new Car(0, 0, "right", "red");
+    // Function to move the car up
+    function moveCarUp(vel) {
+      // Calculate the new top and left positions based on the rotation angle
+        var radians = totalRotation * (Math.PI / 180) * -1; // Convert the angle to radians
+        var topOffset = Math.sin(radians) * vel;
+        var leftOffset = Math.cos(radians) * vel;
+
+        // Update the top and left positions
+        var currentTop = parseInt(window.getComputedStyle(car).getPropertyValue("top"));
+        var currentLeft = parseInt(window.getComputedStyle(car).getPropertyValue("left"));
+        car.style.top = (currentTop - topOffset) + "px";
+        car.style.left = (currentLeft + leftOffset) + "px";
+    }
+
+
+    function turnRight() {
+        totalRotation += 90
+        car.style.transform = "rotate(" +  totalRotation + "deg)";
+    }
+    
+    function turnLeft() {
+        totalRotation -= 90
+        car.style.transform = "rotate(" + totalRotation + "deg)";
+    }
 
     function changeLights(trafficLight, activeIndex = -1) {
         var lights = trafficLight.getElementsByClassName("light");
@@ -281,11 +271,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
             changeLights(trafficLights[i]);
         }
     }
+</script>
 
-    widgets.register("widget_map", 
-    (box) => {
-        box.injectNode(div)
-    })
-}
-
-export default plugin;
+</body>
+</html>
