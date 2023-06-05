@@ -53,13 +53,12 @@
         border-left: 10px dashed white; /* Set the style and color of the dashed line */
         left: 0; /* Position the dashed line on the left side of the main line */
       }
-
+    
     .my-car {
         width: 50px;
         height: 30px;
         background-color: red;
         position: absolute;
-        top: calc(50% + 25px);
         transition: left 0.5s, top 0.5s, transform 0.5s;
     }
 
@@ -69,6 +68,24 @@
         background-color: yellow;
         position: absolute;
         right: 0;
+    }
+
+    .my-car.one.one{
+        top: calc(50% + 25px);
+    }
+
+    .my-car.one.three{
+        top: calc(50% - 55px);
+    }
+
+    .my-car.two.two{
+        left: calc(50% - 65px);
+        transform: rotate(90deg);
+    }
+
+    .my-car.two.four{
+        left: calc(50% + 15px);
+        transform: rotate(90deg);
     }
 
 
@@ -183,14 +200,18 @@
     <div class="road-vertical"></div>
     <div class="road-markings-vertical"></div>
     <div class="road-markings-horizontal"></div>
-    <span class="my-car">
+    <div class="my-car">
         <div class="car-head"></div>
-    </span>
+    </div>
     
 
 <script>
+    function getRandomInteger(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
     // JavaScript code to change the car's position
     var car = document.querySelector(".my-car");
+    car.classList.add('two', 'two')
     var totalRotation = 0; // Track the total rotation angle
 
     // Function to move the car up
