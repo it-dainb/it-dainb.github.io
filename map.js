@@ -6,13 +6,15 @@ var road_making_ver = null;
 var road_making_hor = null;
 
 class Car {
-    constructor(color, vehicle) {
-        this.element = document.getElementById("Car");
+    constructor(color, vehicle, document, map_div) {
+        this.ID = null;
+        this.element = document.createElement("div");
+        
         this.color = color;
         this.element.style.backgroundColor = this.color;
         this.speed = 0;
-        this.vehicle = vehicle
-        
+        this.vehicle = vehicle;
+
         var randomPosition = getRandomInteger(1, 4);
         var offsetPos = getRandomInteger(200, 500) + "px";
 
@@ -46,6 +48,24 @@ class Car {
                 this.lane = 4;
                 break;
         }
+
+        var currentTop = parseInt(
+            window.getComputedStyle(this.element).getPropertyValue("top")
+        );
+        var currentLeft = parseInt(
+            window.getComputedStyle(this.element).getPropertyValue("left")
+        );
+
+        this.x = currentLeft;
+        this.y = currentTop;
+        
+        this.element.className = "my-car";
+        this.element.className = "my-car";
+        this.element.style.backgroundColor = this.color;
+        this.element.style.top = this.y + "px";
+        this.element.style.left = this.x + "px";
+
+        map_div.appendChild(this.element);
     }
 
     moveCarUp(vel) {
@@ -83,6 +103,9 @@ class Car {
             window.getComputedStyle(this.element).getPropertyValue("left")
         );
 
+        this.x = currentLeft;
+        this.y = currentTop;
+
         if (road_making_hor) {
             if (this.direction == "right" || this.direction == "left") {
                 // console.log(currentTop, road_making_hor)
@@ -96,7 +119,7 @@ class Car {
 
         if (road_making_ver) {
             if (this.direction == "up" || this.direction == "down") {
-                console.log(currentLeft, road_making_ver);
+                // console.log(currentLeft, road_making_ver);
                 if (currentLeft >= road_making_ver / 2) {
                     this.lane = 4;
                 } else {
@@ -369,8 +392,34 @@ const map = ({ widgets, simulator, vehicle }) => {
             .getPropertyValue("top")
     );
 
-    console.log(road_making_ver, road_making_hor);
-    const myCar = new Car("red", vehicle);
+    // console.log(road_making_ver, road_making_hor);
+    // const myCar = new Car("red", vehicle);
+
+
+    const carList = []; // Array to store cars
+
+    // // Function to draw cars on the map
+    // const drawCars = (carList) => {
+    //     for (const car of carList) {
+    //         const carElement = document.createElement("div");
+    //         carElement.className = "my-car";
+    //         carElement.style.backgroundColor = car.color;
+    //         carElement.style.top = car.y + "px";
+    //         carElement.style.left = car.x + "px";
+    //         map_div.appendChild(carElement);
+    //     }
+    // };
+
+
+    // Create and add cars to the carList
+    const myCar = new Car("red", vehicle, document, map_div);
+    // const anotherCar = new Car("green", vehicle);
+
+    carList.push(myCar);
+
+    // Call the drawCars function to render the cars on the map
+    // drawCars(carList);
+
 
     function changeLights(trafficLight, activeIndex = -1) {
         var lights = trafficLight.getElementsByClassName("light");
@@ -403,7 +452,7 @@ const map = ({ widgets, simulator, vehicle }) => {
 
         // Set the delay time for the next light change based on the current light
         var delayTime = 0;
-        if (nextIndex%2 === 0) {
+        if (nextIndex % 2 === 0) {
             // Green to yellow transition (10 seconds)
             delayTime = 2000;
         } else if (nextIndex === 1) {
@@ -537,8 +586,6 @@ const map = ({ widgets, simulator, vehicle }) => {
         }
     };
 
-    
-
     const setlaneStatus = () => {
         // console.log("setLaneStatus ---------------------------");
         renderLane(myCar.lane);
@@ -562,7 +609,7 @@ const map = ({ widgets, simulator, vehicle }) => {
                 value = "West";
                 break;
         }
-        
+
         renderDirection(value);
     };
 
@@ -579,8 +626,10 @@ const map = ({ widgets, simulator, vehicle }) => {
         box.injectNode(directionController);
     });
 
-    simulator("Vehicle.ADAS.CruiseControl.SpeedSet", "set", (value) => {
-        myCar.speed = int(value);
+    simulator("Vehicle.ADAS.CruiseControl.SpeedSet", "set", ({ args }) => {
+        const [value] = args;
+        // myCar.speed = int(value);
+        myCar.speed = value;
     });
 
     simulator("Vehicle.Speed", "get", () => {
@@ -589,7 +638,7 @@ const map = ({ widgets, simulator, vehicle }) => {
 
     simulator("Vehicle.CurrentLocation.Heading", "get", () => {
         var angle = null;
-        
+
         switch (myCar.direction) {
             case "up":
                 angle = 0;
@@ -608,25 +657,62 @@ const map = ({ widgets, simulator, vehicle }) => {
         return angle;
     });
 
+    async function update_map() {
+        console.log(myCar.ID);
+        let data = { ID: myCar.ID, x: myCar.x, y: myCar.y, lane: myCar.lane, direction: myCar.direction, speed: myCar.speed };
     
+        try {
+            const response = await fetch("http://localhost:5000/api/data", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+    
+            const responseData = await response.json();
+    
+            if (myCar.ID === null) {
+                myCar.ID = responseData.ID;
+            }
+
+            console.log(responseData); // Handle the response data from the server
+            console.log(myCar.ID);
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
     setInterval(function () {
         var update = function () {
             myCar.updatePosition();
             // setSpeedStatus();
             // setDirectionStatus();
             setlaneStatus();
+            // update_map();
         };
-        
+
         update();
     }, 100);
 
     setInterval(async () => {
-        let speed = await vehicle['Speed'].get();
+        let speed = await vehicle["Speed"].get();
         setSpeedStatus(speed);
 
-        let angle = await vehicle['CurrentLocation.Heading'].get();
+        let angle = await vehicle["CurrentLocation.Heading"].get();
         setDirectionStatus(angle);
-    }, 100)
+
+    }, 100);
+
+    // setInterval(async () => {
+    //     await update_map();
+
+    // }, 1000);
+
+    // return {
+    //     get_pos: () => {
+    //         console.log(myCar.x, myCar.y)
+    //         return [myCar.x, myCar.y]
+    //     },
+    // }
 };
 
 export default map;
