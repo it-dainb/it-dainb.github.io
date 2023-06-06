@@ -1,3 +1,10 @@
+function calculateDistance(x1, y1, x2, y2) {
+    const deltaX = x2 - x1;
+    const deltaY = y2 - y1;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    return distance;
+}
+
 function getRandomInteger(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -460,7 +467,7 @@ const map = ({ widgets, simulator, vehicle }) => {
             }
 
             
-            console.log(data);
+            // console.log(data);
         } catch (error) {
             // Handle any errors that occurred during the fetch request
             console.error("Error:", error);
@@ -675,7 +682,7 @@ const map = ({ widgets, simulator, vehicle }) => {
             }
 
             var carRemove = responseData.Remove_car;
-            // console.log(carRemove);
+            console.log(responseData.cars);
 
             for (const key in responseData.cars) {
                 const car_data = responseData.cars[key];
@@ -692,14 +699,14 @@ const map = ({ widgets, simulator, vehicle }) => {
                 } else {
                     car = carList[car_data.ID];
                 }
-
+                
+                car.setPosition(car_data.x, car_data.y);
                 car.totalRotation = car_data.totalRotation;
                 car.ID = car_data.ID;
                 car.speed = car_data.speed;
                 car.lane = car_data.lane;
                 car.direction = car_data.direction;
 
-                car.setPosition(car_data.x, car_data.y);
                 car.element.style.transform =
                     "rotate(" + car.totalRotation + "deg)";
 
@@ -726,8 +733,77 @@ const map = ({ widgets, simulator, vehicle }) => {
         }
     }
 
+
+    // CORE
+    const avoid_distance = 50;
+    const safe_distance = 20;
+    function avoid_collision() {
+        if (myCar.speed === 0) {
+            return;
+        }
+
+        let offsetX = 0;
+        let offsetY = 0;
+
+        switch (myCar.direction) {
+            case "up":
+                offsetY = 35;
+                break
+            case "left":
+                offsetX = 70;
+                break
+
+        }
+
+        for (let key in carList) {
+            let car = carList[key];
+
+            let break_for = false;
+            if (car.direction == myCar.direction && car.speed > myCar.speed) {
+
+                switch (myCar.direction) {
+                    case "up":
+                        if (car.getY() < myCar.getY()) {
+                            break_for = true;
+                        }
+                        break;
+                    case "left":
+                        if (car.getX() < myCar.getX()) {
+                            break_for = true;
+                        }
+                        break;
+                    case "down":
+                        if (car.getY() > myCar.getY()) {
+                            break_for = true;
+                        }
+                        break;
+                    case "right":
+                        if (car.getX() > myCar.getX()) {
+                            break_for = true;
+                        }
+                        break;
+                }
+            }
+
+            if (break_for) {
+                continue;
+            }
+
+            const distance = calculateDistance(myCar.getX(), myCar.getY(), car.getX() + offsetX, car.getY() + offsetY);
+
+            if (distance - safe_distance <= 0) {
+                myCar.speed = 0;
+            } else if (distance - safe_distance < avoid_distance) {
+                myCar.speed = parseInt(myCar.speed * distance / avoid_distance)
+            }
+        }
+    }
+
+
     setInterval(function () {
         var update = function () {
+            avoid_collision();
+
             myCar.updatePosition();
             // setSpeedStatus();
             // setDirectionStatus();
@@ -746,16 +822,16 @@ const map = ({ widgets, simulator, vehicle }) => {
         setDirectionStatus(angle);
     }, 100);
 
-    setInterval(async () => {
-        await update_map();
-    }, 1000);
 
-    // return {
-    //     get_pos: () => {
-    //         console.log(myCar.x, myCar.y)
-    //         return [myCar.x, myCar.y]
-    //     },
-    // }
+    async function test() {
+        await update_map();
+    }
+
+    setInterval(async () => {
+        await test();
+    }, 500);
+
+
 };
 
 export default map;

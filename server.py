@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import time
+import time, math
 
 import logging
 log = logging.getLogger('werkzeug')
@@ -27,10 +27,8 @@ i = 0
 elapsed_time = None
 old = None
         # print(light_1, int(curr_time), light_2)
-
-def solve_collision(data, car_dict):
-    car_size = [100, 100]
-    
+car_size = [100, 100]
+def solve_collision(data, car_dict):    
     resolve_x = data["x"]
     resolve_y = data["y"]
     
