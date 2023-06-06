@@ -6,11 +6,12 @@ var road_making_ver = null;
 var road_making_hor = null;
 
 class Car {
-    constructor(color) {
+    constructor(color, vehicle) {
         this.element = document.getElementById("Car");
         this.color = color;
         this.element.style.backgroundColor = this.color;
         this.speed = 0;
+        this.vehicle = vehicle
         
         var randomPosition = getRandomInteger(1, 4);
         var offsetPos = getRandomInteger(200, 500) + "px";
@@ -369,7 +370,7 @@ const map = ({ widgets, simulator, vehicle }) => {
     );
 
     console.log(road_making_ver, road_making_hor);
-    const myCar = new Car("red");
+    const myCar = new Car("red", vehicle);
 
     function changeLights(trafficLight, activeIndex = -1) {
         var lights = trafficLight.getElementsByClassName("light");
@@ -377,8 +378,13 @@ const map = ({ widgets, simulator, vehicle }) => {
         // Find the currently active light
         for (var i = 0; i < lights.length; i++) {
             if (lights[i].classList.contains("active")) {
-                activeIndex = i;
-                break;
+                if (activeIndex === -1) {
+                    activeIndex = i;
+                    break;
+                } else if (i === activeIndex) {
+                    lights[activeIndex].classList.add("active");
+                    break;
+                }
             }
         }
 
@@ -397,7 +403,7 @@ const map = ({ widgets, simulator, vehicle }) => {
 
         // Set the delay time for the next light change based on the current light
         var delayTime = 0;
-        if (nextIndex === 0) {
+        if (nextIndex%2 === 0) {
             // Green to yellow transition (10 seconds)
             delayTime = 2000;
         } else if (nextIndex === 1) {
@@ -405,7 +411,7 @@ const map = ({ widgets, simulator, vehicle }) => {
             delayTime = 1000;
         } else if (nextIndex === 2) {
             // Red to green transition (20 seconds)
-            delayTime = 2000;
+            delayTime = 3000;
         }
 
         // Call the changeLights function again after the delay time
@@ -492,16 +498,17 @@ const map = ({ widgets, simulator, vehicle }) => {
         });
     }
 
+    var vel = 5;
     if (carSpeedUp) {
         carSpeedUp.addEventListener("click", () => {
             // console.log("carSpeedUp click");
-            myCar.moveCarUp(5);
+            myCar.moveCarUp(vel);
         });
     }
     if (carSpeedDown) {
         carSpeedDown.addEventListener("click", () => {
             // console.log("carSpeedDown click");
-            myCar.moveCarUp(-5);
+            myCar.moveCarUp(-1 * vel);
         });
     }
 
@@ -524,25 +531,44 @@ const map = ({ widgets, simulator, vehicle }) => {
         }
     };
 
-    const setlaneStatus = () => {
-        // console.log("setLaneStatus ---------------------------");
-        renderLane(myCar.lane);
-    };
-
-    const setDirectionStatus = () => {
-        // console.log("setDirectionStatus ---------------------------");
-        renderDirection(myCar.direction);
-    };
-
     const renderSpeedStatus = (value) => {
         if (speedState) {
             speedState.innerHTML = value;
         }
     };
 
-    const setSpeedStatus = () => {
+    
+
+    const setlaneStatus = () => {
+        // console.log("setLaneStatus ---------------------------");
+        renderLane(myCar.lane);
+    };
+
+    const setDirectionStatus = (angle) => {
+        // console.log("setDirectionStatus ---------------------------");
+        var value = null;
+
+        switch (angle) {
+            case 0:
+                value = "North";
+                break;
+            case 90:
+                value = "East";
+                break;
+            case 180:
+                value = "South";
+                break;
+            case 270:
+                value = "West";
+                break;
+        }
+        
+        renderDirection(value);
+    };
+
+    const setSpeedStatus = (speed) => {
         //   console.log("setSpeedStatus ---------------------------");
-        renderSpeedStatus(myCar.speed);
+        renderSpeedStatus(speed);
     };
 
     widgets.register("Speed", (box) => {
@@ -553,16 +579,54 @@ const map = ({ widgets, simulator, vehicle }) => {
         box.injectNode(directionController);
     });
 
+    simulator("Vehicle.ADAS.CruiseControl.SpeedSet", "set", (value) => {
+        myCar.speed = int(value);
+    });
+
+    simulator("Vehicle.Speed", "get", () => {
+        return myCar.speed;
+    });
+
+    simulator("Vehicle.CurrentLocation.Heading", "get", () => {
+        var angle = null;
+        
+        switch (myCar.direction) {
+            case "up":
+                angle = 0;
+                break;
+            case "right":
+                angle = 90;
+                break;
+            case "down":
+                angle = 180;
+                break;
+            case "left":
+                angle = 270;
+                break;
+        }
+
+        return angle;
+    });
+
+    
     setInterval(function () {
         var update = function () {
             myCar.updatePosition();
-            setSpeedStatus();
-            setDirectionStatus();
+            // setSpeedStatus();
+            // setDirectionStatus();
             setlaneStatus();
         };
-
+        
         update();
     }, 100);
+
+    setInterval(async () => {
+        let speed = await vehicle['Speed'].get();
+        setSpeedStatus(speed);
+
+        let angle = await vehicle['CurrentLocation.Heading'].get();
+        setDirectionStatus(angle);
+    }, 100)
 };
 
 export default map;
