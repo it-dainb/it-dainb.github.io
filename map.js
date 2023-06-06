@@ -6,49 +6,56 @@ var road_making_ver = null;
 var road_making_hor = null;
 
 class Car {
-    constructor(color, vehicle, document, map_div) {
+    constructor(color, vehicle, document, map_div, randomPosition = -1) {
         this.ID = null;
         this.element = document.createElement("div");
+        let head = document.createElement("div");
+        head.className = "car-head"
         
         this.color = color;
         this.element.style.backgroundColor = this.color;
         this.speed = 0;
         this.vehicle = vehicle;
 
-        var randomPosition = getRandomInteger(1, 4);
-        var offsetPos = getRandomInteger(200, 500) + "px";
+        this.element.className = "my-car";
+        
+        if (randomPosition == -1) {
+            randomPosition = getRandomInteger(1, 4);
+            var offsetPos = getRandomInteger(0, 300) + "px";
+            // this.element.className = "my-car";
+                
+            switch (randomPosition) {
+                case 1:
+                    this.element.classList.add("one", "one");
+                    this.element.style.left += offsetPos;
+                    this.direction = "right";
+                    this.totalRotation = 0;
+                    this.lane = 1;
+                    break;
+                case 2:
+                    this.element.classList.add("one", "three");
+                    this.element.style.left += offsetPos;
+                    this.direction = "left";
+                    this.totalRotation = 180;
+                    this.lane = 2;
+                    break;
+                case 3:
+                    this.element.classList.add("two", "two");
+                    this.element.style.top += offsetPos;
+                    this.direction = "down";
+                    this.totalRotation = 90;
+                    this.lane = 3;
+                    break;
+                case 4:
+                    this.element.classList.add("two", "four");
+                    this.element.style.top += offsetPos;
+                    this.direction = "up";
+                    this.totalRotation = -90;
+                    this.lane = 4;
+                    break;
+            }
 
-        switch (randomPosition) {
-            case 1:
-                this.element.classList.add("one", "one");
-                this.element.style.left += offsetPos;
-                this.direction = "right";
-                this.totalRotation = 0;
-                this.lane = 1;
-                break;
-            case 2:
-                this.element.classList.add("one", "three");
-                this.element.style.left += offsetPos;
-                this.direction = "left";
-                this.totalRotation = 180;
-                this.lane = 2;
-                break;
-            case 3:
-                this.element.classList.add("two", "two");
-                this.element.style.top += offsetPos;
-                this.direction = "down";
-                this.totalRotation = 90;
-                this.lane = 3;
-                break;
-            case 4:
-                this.element.classList.add("two", "four");
-                this.element.style.top += offsetPos;
-                this.direction = "up";
-                this.totalRotation = -90;
-                this.lane = 4;
-                break;
-        }
-
+        }   
         var currentTop = parseInt(
             window.getComputedStyle(this.element).getPropertyValue("top")
         );
@@ -56,21 +63,40 @@ class Car {
             window.getComputedStyle(this.element).getPropertyValue("left")
         );
 
-        this.x = currentLeft;
-        this.y = currentTop;
-        
-        this.element.className = "my-car";
-        this.element.className = "my-car";
         this.element.style.backgroundColor = this.color;
-        this.element.style.top = this.y + "px";
-        this.element.style.left = this.x + "px";
 
+        this.element.appendChild(head)
         map_div.appendChild(this.element);
+    }
+
+    setPosition(x, y) {
+        this.element.style.left = x + "px";
+        this.element.style.top = y + "px";
+    }
+
+    showCar() {
+        this.element.style.display = "block";
+    }
+
+    hideCar() {
+        this.element.style.display = "none";
     }
 
     moveCarUp(vel) {
         // Calculate the new top and left positions based on the rotation angle
         this.speed += vel;
+    }
+
+    getX() {
+        return parseInt(
+            window.getComputedStyle(this.element).getPropertyValue("left")
+        );
+    }
+
+    getY() {
+        return parseInt(
+            window.getComputedStyle(this.element).getPropertyValue("top")
+        );
     }
 
     updatePosition() {
@@ -102,9 +128,6 @@ class Car {
         currentLeft = parseInt(
             window.getComputedStyle(this.element).getPropertyValue("left")
         );
-
-        this.x = currentLeft;
-        this.y = currentTop;
 
         if (road_making_hor) {
             if (this.direction == "right" || this.direction == "left") {
@@ -372,10 +395,6 @@ const map = ({ widgets, simulator, vehicle }) => {
     <div class="road-vertical"></div>
     <div id="rmv" class="road-markings-vertical"></div>
     <div id="rmh" class="road-markings-horizontal"></div>
-    <div id="Car" class="my-car">
-        <div class="car-head"></div>
-    </div>
-  
     `;
 
     // Append the div to the document body
@@ -396,7 +415,8 @@ const map = ({ widgets, simulator, vehicle }) => {
     // const myCar = new Car("red", vehicle);
 
 
-    const carList = []; // Array to store cars
+    var carList = {}; // Array to store cars
+    var carList_ID = []; // Array to store cars
 
     // // Function to draw cars on the map
     // const drawCars = (carList) => {
@@ -413,9 +433,13 @@ const map = ({ widgets, simulator, vehicle }) => {
 
     // Create and add cars to the carList
     const myCar = new Car("red", vehicle, document, map_div);
+    // myCar.hideCar();
+    // const myCar1 = new Car("green", vehicle, document, map_div);
+    // const myCar2 = new Car("yellow", vehicle, document, map_div);
+    // const myCar3 = new Car("blue", vehicle, document, map_div);
     // const anotherCar = new Car("green", vehicle);
 
-    carList.push(myCar);
+    // carList.push(myCar);
 
     // Call the drawCars function to render the cars on the map
     // drawCars(carList);
@@ -658,8 +682,8 @@ const map = ({ widgets, simulator, vehicle }) => {
     });
 
     async function update_map() {
-        console.log(myCar.ID);
-        let data = { ID: myCar.ID, x: myCar.x, y: myCar.y, lane: myCar.lane, direction: myCar.direction, speed: myCar.speed };
+        // console.log(myCar.ID);
+        let data = { ID: myCar.ID, x: myCar.getX(), y: myCar.getY(), lane: myCar.lane, direction: myCar.direction, speed: myCar.speed, totalRotation: myCar.totalRotation };
     
         try {
             const response = await fetch("http://localhost:5000/api/data", {
@@ -672,10 +696,58 @@ const map = ({ widgets, simulator, vehicle }) => {
     
             if (myCar.ID === null) {
                 myCar.ID = responseData.ID;
+                console.log("MY ID", myCar.ID);
             }
+            
+            
+            var carRemove = responseData.Remove_car;
+            // console.log(carRemove);
 
-            console.log(responseData); // Handle the response data from the server
-            console.log(myCar.ID);
+            for (const key in responseData.cars) {
+                const car_data = responseData.cars[key];
+                // console.log(carRemove)
+
+                // if (car_data.ID === myCar.ID) {
+                //     continue;
+                // }
+
+                let car = null;
+                if (!(car_data.ID in carList)) {
+                    console.log("CREATE CAR", car_data.ID);
+                    car = new Car("green", vehicle, document, map_div);
+                } else {
+                    car = carList[car_data.ID];
+                }
+                
+                car.totalRotation = car_data.totalRotation
+                car.ID = car_data.ID
+                car.speed = car_data.speed
+                car.lane = car_data.lane
+                car.direction = car_data.direction
+                
+                car.setPosition(car_data.x, car_data.y);
+                car.element.style.transform = "rotate(" + car.totalRotation + "deg)";
+
+                if (!(car_data.ID in carList)) {
+                    carList[car_data.ID] = car;
+                }
+            }
+            
+
+            // console.log(carList);
+            // console.log(carRemove);
+            // console.log(carList);
+            for (let key in carList) {
+                for (let idx in carRemove) {
+                    let carRID = carRemove[idx];
+                    if (parseInt(key) === parseInt(carRID)) {
+                        
+                        // console.log(carList[key]);
+                        carList[key].hideCar();
+                        break;
+                    }
+                }
+            }
         } catch (error) {
             console.error("Error:", error);
         }
@@ -702,10 +774,10 @@ const map = ({ widgets, simulator, vehicle }) => {
 
     }, 100);
 
-    // setInterval(async () => {
-    //     await update_map();
+    setInterval(async () => {
+        await update_map();
 
-    // }, 1000);
+    }, 500);
 
     // return {
     //     get_pos: () => {
