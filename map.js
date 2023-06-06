@@ -411,55 +411,12 @@ const map = ({ widgets, simulator, vehicle }) => {
             .getPropertyValue("top")
     );
 
-    // console.log(road_making_ver, road_making_hor);
-    // const myCar = new Car("red", vehicle);
-
-
     var carList = {}; // Array to store cars
-    var carList_ID = []; // Array to store cars
 
-    // // Function to draw cars on the map
-    // const drawCars = (carList) => {
-    //     for (const car of carList) {
-    //         const carElement = document.createElement("div");
-    //         carElement.className = "my-car";
-    //         carElement.style.backgroundColor = car.color;
-    //         carElement.style.top = car.y + "px";
-    //         carElement.style.left = car.x + "px";
-    //         map_div.appendChild(carElement);
-    //     }
-    // };
-
-
-    // Create and add cars to the carList
     const myCar = new Car("red", vehicle, document, map_div);
-    // myCar.hideCar();
-    // const myCar1 = new Car("green", vehicle, document, map_div);
-    // const myCar2 = new Car("yellow", vehicle, document, map_div);
-    // const myCar3 = new Car("blue", vehicle, document, map_div);
-    // const anotherCar = new Car("green", vehicle);
 
-    // carList.push(myCar);
-
-    // Call the drawCars function to render the cars on the map
-    // drawCars(carList);
-
-
-    function changeLights(trafficLight, activeIndex = -1) {
+    function changeLights(trafficLight, activeIndex) {
         var lights = trafficLight.getElementsByClassName("light");
-
-        // Find the currently active light
-        for (var i = 0; i < lights.length; i++) {
-            if (lights[i].classList.contains("active")) {
-                if (activeIndex === -1) {
-                    activeIndex = i;
-                    break;
-                } else if (i === activeIndex) {
-                    lights[activeIndex].classList.add("active");
-                    break;
-                }
-            }
-        }
 
         // Turn off all lights and set them to the "inactive" class
         for (var i = 0; i < lights.length; i++) {
@@ -467,44 +424,54 @@ const map = ({ widgets, simulator, vehicle }) => {
             lights[i].classList.add("inactive");
         }
 
-        // Determine the next light in sequence based on the current active light
-        var nextIndex = (activeIndex + 1) % lights.length;
-
         // Turn on the next light by removing the "inactive" class and adding the "active" class
-        lights[nextIndex].classList.remove("inactive");
-        lights[nextIndex].classList.add("active");
-
-        // Set the delay time for the next light change based on the current light
-        var delayTime = 0;
-        if (nextIndex % 2 === 0) {
-            // Green to yellow transition (10 seconds)
-            delayTime = 2000;
-        } else if (nextIndex === 1) {
-            // Yellow to red transition (5 seconds)
-            delayTime = 1000;
-        } else if (nextIndex === 2) {
-            // Red to green transition (20 seconds)
-            delayTime = 3000;
-        }
-
-        // Call the changeLights function again after the delay time
-        setTimeout(function () {
-            changeLights(trafficLight);
-        }, delayTime);
+        lights[activeIndex].classList.remove("inactive");
+        lights[activeIndex].classList.add("active");
     }
+
+    var trafficLights = document.querySelectorAll(".traffic-light");
+
+    async function fetchLightData() {
+        try {
+            const response = await fetch("http://localhost:5000/api/light", {
+                method: "GET",
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    "Request failed with status " + response.status
+                );
+            }
+
+            const data = await response.json();
+
+            // Handle the response data
+
+            for (var i = 0; i < trafficLights.length; i++) {
+                if (
+                    trafficLights[i].classList.contains("one") ||
+                    trafficLights[i].classList.contains("two")
+                ) {
+                    changeLights(trafficLights[i], data.light_2);
+                } else {
+                    changeLights(trafficLights[i], data.light_1);
+                    // changeLights(trafficLights[i]);
+                }
+            }
+
+            
+            console.log(data);
+        } catch (error) {
+            // Handle any errors that occurred during the fetch request
+            console.error("Error:", error);
+        }
+    }
+
+    setInterval(async () => {
+        await fetchLightData();
+    }, 100);
 
     // Start the traffic light sequence for each traffic light
-    var trafficLights = document.querySelectorAll(".traffic-light");
-    for (var i = 0; i < trafficLights.length; i++) {
-        if (
-            trafficLights[i].classList.contains("one") ||
-            trafficLights[i].classList.contains("two")
-        ) {
-            changeLights(trafficLights[i], 1);
-        } else {
-            changeLights(trafficLights[i]);
-        }
-    }
 
     widgets.register("widget_map", (box) => {
         box.injectNode(map_div);
@@ -683,23 +650,30 @@ const map = ({ widgets, simulator, vehicle }) => {
 
     async function update_map() {
         // console.log(myCar.ID);
-        let data = { ID: myCar.ID, x: myCar.getX(), y: myCar.getY(), lane: myCar.lane, direction: myCar.direction, speed: myCar.speed, totalRotation: myCar.totalRotation };
-    
+        let data = {
+            ID: myCar.ID,
+            x: myCar.getX(),
+            y: myCar.getY(),
+            lane: myCar.lane,
+            direction: myCar.direction,
+            speed: myCar.speed,
+            totalRotation: myCar.totalRotation,
+        };
+
         try {
             const response = await fetch("http://localhost:5000/api/data", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
             });
-    
+
             const responseData = await response.json();
-    
+
             if (myCar.ID === null) {
                 myCar.ID = responseData.ID;
                 console.log("MY ID", myCar.ID);
             }
-            
-            
+
             var carRemove = responseData.Remove_car;
             // console.log(carRemove);
 
@@ -718,21 +692,21 @@ const map = ({ widgets, simulator, vehicle }) => {
                 } else {
                     car = carList[car_data.ID];
                 }
-                
-                car.totalRotation = car_data.totalRotation
-                car.ID = car_data.ID
-                car.speed = car_data.speed
-                car.lane = car_data.lane
-                car.direction = car_data.direction
-                
+
+                car.totalRotation = car_data.totalRotation;
+                car.ID = car_data.ID;
+                car.speed = car_data.speed;
+                car.lane = car_data.lane;
+                car.direction = car_data.direction;
+
                 car.setPosition(car_data.x, car_data.y);
-                car.element.style.transform = "rotate(" + car.totalRotation + "deg)";
+                car.element.style.transform =
+                    "rotate(" + car.totalRotation + "deg)";
 
                 if (!(car_data.ID in carList)) {
                     carList[car_data.ID] = car;
                 }
             }
-            
 
             // console.log(carList);
             // console.log(carRemove);
@@ -741,7 +715,6 @@ const map = ({ widgets, simulator, vehicle }) => {
                 for (let idx in carRemove) {
                     let carRID = carRemove[idx];
                     if (parseInt(key) === parseInt(carRID)) {
-                        
                         // console.log(carList[key]);
                         carList[key].hideCar();
                         break;
@@ -771,13 +744,11 @@ const map = ({ widgets, simulator, vehicle }) => {
 
         let angle = await vehicle["CurrentLocation.Heading"].get();
         setDirectionStatus(angle);
-
     }, 100);
 
     setInterval(async () => {
         await update_map();
-
-    }, 500);
+    }, 1000);
 
     // return {
     //     get_pos: () => {
