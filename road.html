@@ -166,6 +166,55 @@
         text-align: right;
       }
 
+      
+      .lane-label {
+        position: absolute;
+        font-size: 50px;
+        color: white;
+        font-weight: bold;
+      }
+      
+    
+    .lane-label.one {
+        top: calc(50% + 10px);
+        left: 10px;
+    }
+    
+    .lane-label.two {
+        top: calc(50% - 70px);
+        left: 10px;
+    }
+    
+    .lane-label.three {
+        top: 10px;
+        left: calc(50% - 55px);
+    }
+    
+    .lane-label.four {
+        top: 10px;
+        left: calc(50% + 30px);
+    }
+
+    .lane-label.six {
+        top: calc(50% + 10px);
+        right: 10px;
+    }
+    
+    .lane-label.five {
+        top: calc(50% - 70px);
+        right: 10px;
+    }
+
+    .lane-label.seven {
+        bottom: 10px;
+        left: calc(50% + 30px);
+    }
+    
+    .lane-label.eight {
+        bottom: 10px;
+        left: calc(50% - 55px);
+    }
+
 </style>
 </head>
 <body>
@@ -195,9 +244,17 @@
             <div class="light yellow"></div>
             <div class="light red"></div>
         </div>
-
+        <div class="lane-label one">1</div>
+        <div class="lane-label two">2</div>
+        <div class="lane-label five">2</div>
+        <div class="lane-label six">1</div>
     </div>
-    <div class="road-vertical"></div>
+    <div class="road-vertical">
+      <div class="lane-label three">3</div>
+        <div class="lane-label four">4</div>
+        <div class="lane-label seven">4</div>
+        <div class="lane-label eight">3</div>
+    </div>
     <div class="road-markings-vertical"></div>
     <div class="road-markings-horizontal"></div>
     <div class="my-car">

@@ -74,7 +74,7 @@ def handle_data():
     for car, live in cars_live.items():
         # print(car, time.time() - live)
         
-        if time.time() - live > 3:
+        if time.time() - live > 10:
             if car not in remove_cars:
                 remove_cars.append(car)
         else:

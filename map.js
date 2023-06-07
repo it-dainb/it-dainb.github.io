@@ -138,8 +138,8 @@ class Car {
 
         if (road_making_hor) {
             if (this.direction == "right" || this.direction == "left") {
-                // console.log(currentTop, road_making_hor)
-                if (currentTop >= road_making_hor / 2) {
+                console.log(currentTop, road_making_hor)
+                if (currentTop >= 350) {
                     this.lane = 1;
                 } else {
                     this.lane = 2;
@@ -149,8 +149,8 @@ class Car {
 
         if (road_making_ver) {
             if (this.direction == "up" || this.direction == "down") {
-                // console.log(currentLeft, road_making_ver);
-                if (currentLeft >= road_making_ver / 2) {
+                console.log(currentLeft, road_making_ver / 2);
+                if (currentLeft >= 350) {
                     this.lane = 4;
                 } else {
                     this.lane = 3;
@@ -369,6 +369,54 @@ const map = ({ widgets, simulator, vehicle }) => {
         background-color: green;
         text-align: right;
       }
+
+      .lane-label {
+        position: absolute;
+        font-size: 50px;
+        color: white;
+        font-weight: bold;
+      }
+      
+    
+    .lane-label.one {
+        top: calc(50% + 10px);
+        left: 10px;
+    }
+    
+    .lane-label.two {
+        top: calc(50% - 70px);
+        left: 10px;
+    }
+    
+    .lane-label.three {
+        top: 10px;
+        left: calc(50% - 55px);
+    }
+    
+    .lane-label.four {
+        top: 10px;
+        left: calc(50% + 30px);
+    }
+
+    .lane-label.six {
+        top: calc(50% + 10px);
+        right: 10px;
+    }
+    
+    .lane-label.five {
+        top: calc(50% - 70px);
+        right: 10px;
+    }
+
+    .lane-label.seven {
+        bottom: 10px;
+        left: calc(50% + 30px);
+    }
+    
+    .lane-label.eight {
+        bottom: 10px;
+        left: calc(50% - 55px);
+    }
 </style>
 <div class="note">
 <span class="my-car-color"><span class="bold-text">My car</span></span>
@@ -397,9 +445,17 @@ const map = ({ widgets, simulator, vehicle }) => {
             <div class="light yellow"></div>
             <div class="light red"></div>
         </div>
-
+        <div class="lane-label one">1</div>
+        <div class="lane-label two">2</div>
+        <div class="lane-label five">2</div>
+        <div class="lane-label six">1</div>
     </div>
-    <div class="road-vertical"></div>
+    <div class="road-vertical">
+        <div class="lane-label three">3</div>
+        <div class="lane-label four">4</div>
+        <div class="lane-label seven">4</div>
+        <div class="lane-label eight">3</div>
+    </div>
     <div id="rmv" class="road-markings-vertical"></div>
     <div id="rmh" class="road-markings-horizontal"></div>
     `;
@@ -624,10 +680,20 @@ const map = ({ widgets, simulator, vehicle }) => {
         box.injectNode(directionController);
     });
 
+    
+
     simulator("Vehicle.ADAS.CruiseControl.SpeedSet", "set", ({ args }) => {
         const [value] = args;
         // myCar.speed = int(value);
         myCar.speed = value;
+    });
+    
+    simulator("Vehicle.CurrentLocation.HorizontalAccuracy", "get", () => {
+        return myCar.getY();
+    });
+    
+    simulator("Vehicle.CurrentLocation.VerticalAccuracy", "get", () => {
+        return myCar.getX();
     });
 
     simulator("Vehicle.Speed", "get", () => {
@@ -742,15 +808,24 @@ const map = ({ widgets, simulator, vehicle }) => {
             return;
         }
 
-        let offsetX = 0;
-        let offsetY = 0;
+        let offsetX_1 = 0;
+        let offsetX_2 = 0;
+        let offsetY_1 = 0;
+        let offsetY_2 = 0;
 
         switch (myCar.direction) {
             case "up":
-                offsetY = 35;
+                offsetY_1 = -70;
+                offsetY_2 = 35
                 break
             case "left":
-                offsetX = 70;
+                offsetX_2 = 70;
+                break
+            case "down":
+                offsetY_1 = 70;
+                break
+            case "right":
+                offsetX_1 = 200;
                 break
 
         }
@@ -789,7 +864,11 @@ const map = ({ widgets, simulator, vehicle }) => {
                 continue;
             }
 
-            const distance = calculateDistance(myCar.getX(), myCar.getY(), car.getX() + offsetX, car.getY() + offsetY);
+            const distance = calculateDistance(myCar.getX() + offsetX_1, myCar.getY() + offsetY_1, car.getX() + offsetX_1, car.getY() + offsetY_2);
+
+            if (distance > avoid_distance) {
+                continue;
+            }
 
             if (distance - safe_distance <= 0) {
                 myCar.speed = 0;
