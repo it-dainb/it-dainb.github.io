@@ -28,9 +28,9 @@ const map = ({ widgets, simulator, vehicle }) => {
     </style>
     <link rel="stylesheet" href="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.css"/>
     <div id="map"></div>
-    <script src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.js"></script>
-    <script src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.rotatedMarker.js"></script>
-    <script src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/script.js"></script>
+    <script type="module" src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.js"></script>
+    <script type="module" src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.rotatedMarker.js"></script>
+    <script type="module" src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/script.js"></script>
     `;
 
     // Append the div to the document body
