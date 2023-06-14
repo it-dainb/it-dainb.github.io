@@ -28,9 +28,9 @@ const map = ({ widgets, simulator, vehicle }) => {
     </style>
     <link rel="stylesheet" href="leaflet/leaflet.css"/>
     <div id="map"></div>
-    <script src="Round_4/leaflet/leaflet.js"></script>
-    <script src="Round_4/leaflet/leaflet.rotatedMarker.js"></script>
-    <script src="Round_4/script.js"></script>
+    <script src="leaflet/leaflet.js"></script>
+    <script src="leaflet/leaflet.rotatedMarker.js"></script>
+    <script src="script.js"></script>
     `;
 
     // Append the div to the document body
