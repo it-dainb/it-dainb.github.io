@@ -165,38 +165,25 @@
 
 // };
 
-const map = ({ widgets, simulator, vehicle }) => {
-    const map_div = document.createElement("div");
-    
-    map_div.innerHTML = `
-    <title>Car Drawing and Moving Map</title>
-    <style>
-        #map {
-            position: relative;
-            width: 500px;
-            height: 300px;
-            overflow: hidden;
-            border: 1px solid black;
-        }
+const plugin = ({ widgets, simulator, vehicle }) => {
+    const sampleDiv = document.createElement("div")
+    sampleDiv.innerHTML = `
+    <div style='font-size:20px;width:100%;height:100%;background-color:yellow;color:red;text-align:center;margin:auto;'>
+        <div> Wiper status:  <span id="wiper">Unknown</span></div>
+    </div>
+    `
 
-        #carCanvas {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-    </style>
-    <link rel="stylesheet" href="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.css"/>
-    <div id="map"></div>
-    `;
+    let wiper = sampleDiv.querySelector("#wiper")
 
-    // Append the div to the document body
-    // document.body.appendChild(map_div);
+    setInterval(async () => {
+        let value = await vehicle['Body.Windshield.Front.Wiping.Mode'].get()
+        wiper.innerHTML = value
+    }, 500)
 
-    widgets.register("map", (box) => {
-        box.injectNode(map_div);
-    });
+    widgets.register("map", 
+    (box) => {
+        box.injectNode(sampleDiv)
+    })
+}
 
-};
-
-export default map;
+export default plugin;
