@@ -37,6 +37,11 @@ const map = ({ widgets, simulator, vehicle }) => {
 
     // Append the div to the document body
     // document.body.appendChild(map_div);
+
+    widgets.register("map", (box) => {
+        box.injectNode(map_div);
+    });
+
 };
 
 export default map;
