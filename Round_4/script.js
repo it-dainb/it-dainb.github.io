@@ -1,3 +1,6 @@
+import './leaflet/leaflet.js';
+import './leaflet/leaflet.rotatedMarker.js';
+
 ;window.addEventListener('load', () => {
     // Create the map
     const map = L.map('map', {

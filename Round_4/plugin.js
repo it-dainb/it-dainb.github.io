@@ -1,3 +1,5 @@
+import 'script.js';
+
 window.onload = function() {
     // Access the carMarker variable from the global object
     carMarker = window.carMarker;
@@ -28,9 +30,6 @@ const map = ({ widgets, simulator, vehicle }) => {
     </style>
     <link rel="stylesheet" href="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.css"/>
     <div id="map"></div>
-    <script type="module" src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.js"></script>
-    <script type="module" src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/leaflet/leaflet.rotatedMarker.js"></script>
-    <script type="module" src="https://raw.githubusercontent.com/it-dainb/it-dainb.github.io/main/Round_4/script.js"></script>
     `;
 
     // Append the div to the document body
