@@ -14,7 +14,7 @@
     const imageOptions = { opacity: 1, attribution: 'Crossroad Image' };
     
     
-    const imageURL = 'image/crossroad.png';
+    const imageURL = 'images/crossroad.png';
     // Create the custom image overlay representing the crossroad
     const imageOverlay = L.imageOverlay(imageURL, bounds, imageOptions).addTo(map)
     var imageWidth = imageOverlay._image.width;
@@ -28,7 +28,7 @@
     
     var iconSize = 70;
     const carIcon = L.icon({
-        iconUrl: 'image/car.png', // Replace with the URL to your car icon image
+        iconUrl: 'images/car.png', // Replace with the URL to your car icon image
         iconSize: [iconSize, iconSize],
         iconAnchor: [iconSize / 2, iconSize / 2],
     });
