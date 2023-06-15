@@ -1,9 +1,9 @@
-window.onload = function() {
-    // Access the carMarker variable from the global object
-    carMarker = window.carMarker;
-    chooseRoad = window.chooseRoad;
+// window.onload = function() {
+//     // Access the carMarker variable from the global object
+//     carMarker = window.carMarker;
+//     chooseRoad = window.chooseRoad;
 
-};
+// };
 
 
 const map = ({ widgets, simulator, vehicle }) => {
@@ -27,11 +27,6 @@ const map = ({ widgets, simulator, vehicle }) => {
             transform: translate(-50%, -50%);
         }
     </style>
-    <link rel="stylesheet" href="it-dainb.github.io/Round_4/leaflet/leaflet.css"/>
-    <div id="map"></div>
-    <script src="it-dainb.github.io/Round_4/leaflet/leaflet.js"></script>
-    <script src="it-dainb.github.io/Round_4/leaflet/leaflet.rotatedMarker.js"></script>
-    <script src="it-dainb.github.io/Round_4/script.js"></script>
     `;
 
     // Append the div to the document body
