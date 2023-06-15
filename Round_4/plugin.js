@@ -10,9 +10,8 @@ const map = ({ widgets, simulator, vehicle }) => {
     const map_div = document.createElement("div");
     
     map_div.innerHTML = `
-    <title>Car Drawing and Moving Map</title>
     <style>
-        #map {
+        .map {
             position: relative;
             width: 500px;
             height: 300px;
@@ -20,7 +19,7 @@ const map = ({ widgets, simulator, vehicle }) => {
             border: 1px solid black;
         }
 
-        #carCanvas {
+        .carCanvas {
             position: absolute;
             top: 50%;
             left: 50%;
