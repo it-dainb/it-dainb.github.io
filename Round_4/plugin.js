@@ -27,11 +27,11 @@ const map = ({ widgets, simulator, vehicle }) => {
             transform: translate(-50%, -50%);
         }
     </style>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/it-dainb/it-dainb.github.io@main/Round_4/leaflet/leaflet.css"/>
+    <link rel="stylesheet" href="https://it-dainb.github.io/Round_4/leaflet/leaflet.css"/>
     <div id="map"></div>
-    <script src="https://cdn.jsdelivr.net/gh/it-dainb/it-dainb.github.io@main/Round_4/leaflet/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/it-dainb/it-dainb.github.io@main/Round_4/leaflet/leaflet.rotatedMarker.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/it-dainb/it-dainb.github.io@main/Round_4/script.js"></script>
+    <script src="https://it-dainb.github.io/Round_4/leaflet/leaflet.js"></script>
+    <script src="https://it-dainb.github.io/Round_4/leaflet/leaflet.rotatedMarker.js"></script>
+    <script src="https://it-dainb.github.io/Round_4/script.js"></script>
     <!-- <script src="plugin.js"></script> -->
     `;
 
