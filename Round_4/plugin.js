@@ -1,11 +1,3 @@
-// window.onload = function() {
-//     // Access the carMarker variable from the global object
-//     carMarker = window.carMarker;
-//     chooseRoad = window.chooseRoad;
-
-// };
-
-
 const plugin = ({ widgets, simulator, vehicle }) => {
     const sampleDiv = document.createElement("div")
     sampleDiv.innerHTML = `
