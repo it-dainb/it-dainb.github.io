@@ -14,8 +14,38 @@ function findHeading(angle) {
     return heading;
 }
 
+class Box {
+    constructor(element) {
+        this.window = element;
+    }
+
+    createCar(pos, name = "car") {
+        const images_path = "https://it-dainb.github.io/Round_4/images/";
+        const iconUrl = images_path + name + '.png';
+        
+        var iconSize = 90  * this.window.scale;
+        const carIcon = this.window.L.icon({
+            iconUrl: iconUrl, // Replace with the URL to your car icon image
+            iconSize: [iconSize, iconSize],
+            iconAnchor: [iconSize / 2, iconSize / 2],
+        });
+    
+        const carMarker = this.window.L.marker(
+            pos,
+            {   icon: carIcon ,
+                rotationAngle: 0,
+                rotationOrigin: "center",
+            }
+        ).addTo(this.window.map);
+    
+        const car = new Car(carMarker, this.window.L);
+        
+        return car;
+    }
+}
+
 class Car {
-    constructor(element, L, zone) {
+    constructor(element, L, zone = null) {
         this.element = element;
         this.speed = 0;
         this.angle = element.options.rotationAngle;
@@ -25,6 +55,8 @@ class Car {
         this.pos = this.element.getLatLng();
         this.L = L;
         this.zone = zone;
+        this.turn = "s";
+        this.canTurn = false;
     }
 
     move(speed) {
@@ -42,13 +74,40 @@ class Car {
         this.heading = findHeading(this.angle);
     }
 
+    turnRight() {
+        this.turn = 'r';
+    }
+
+    turnLeft() {
+        this.turn = 'l'
+    }
+
+    updateTurn() {
+        if (this.canTurn && this.turn !== 's') {
+            if (this.turn === 'r') {
+                this.rotate(90);
+            } else if (this.turn === 'l') {
+                this.rotate(-90);
+            }
+
+            this.turn = 's';
+        }
+    }
+
+    setPos(pos) {
+        this.element.setLatLng(pos);
+    }
+
     update(map) {
+        this.updateTurn();
+
+
         let pos = this.element.getLatLng();
         let speed = this.speed / 1000 * 10;
         let angle = this.angle * Math.PI / 180;
 
         pos = this.L.latLng(pos.lat + -1 * Math.sin(angle) * speed, pos.lng + Math.cos(angle) * speed);
-        this.element.setLatLng(pos);
+        this.setPos(pos);
 
         map.panTo(pos);
     }
@@ -115,13 +174,20 @@ const map = ({ widgets, simulator, vehicle }) => {
             let mapContainer = iframeWindow.document.getElementById("map");
             let map = iframeWindow.map;
             
-            // map.setZoom(1.5);
-            car = new Car(carMarker, iframeWindow.L, box_window.circle);
+            var box_obj = new Box(box_window);
+            window.box = box_obj;
 
-            box_window.changeColor('y');
+            // map.setZoom(1.5);
+            car = new Car(carMarker, box_window.L, box_window.circle);
+
+            window.car = car;
+            // window.testCar = box_obj.createCar([300, 200]);;
+
+            // car.zone.changeColor('y');
 
             // car.rotate(90);
-            car.move(60);
+            // car.move(60);
+            // car.turnRight();
             // car.update();
 
             // Adjust map container dimensions
@@ -138,13 +204,8 @@ const map = ({ widgets, simulator, vehicle }) => {
             // Access the carMarker variable here
             setInterval(() => {
                 // console.log(box_window.canTurn);
+                car.canTurn = box_window.canTurn;
 
-                if (box_window.canTurn && oneTime) {
-                    car.rotate(90);
-                    oneTime = false;
-                } else if (!box_window.canTurn) {
-                    oneTime = true;
-                }
 
 
 

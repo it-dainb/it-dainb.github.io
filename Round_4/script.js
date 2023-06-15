@@ -36,12 +36,13 @@ function calculateDistance(x1, y1, x2, y2) {
     window.map = map;
     var scale = 1;
     map.setZoom(scale);
+    window.scale = scale;
 
     // Define the image bounds and dimensions
     const bounds = [[0, 0], [500, 500]];
     const imageOptions = { opacity: 1, attribution: 'Crossroad Image' };
     
-    const images_path = "https://it-dainb.github.io/Round_4/images/"
+    const images_path = "https://it-dainb.github.io/Round_4/images/";
     
     const imageURL = images_path + 'crossroad.png';
     const iconUrl = images_path + 'car.png';
@@ -63,6 +64,8 @@ function calculateDistance(x1, y1, x2, y2) {
         iconSize: [iconSize, iconSize],
         iconAnchor: [iconSize / 2, iconSize / 2],
     });
+
+    window.carIcon = carIcon;
     
     var center = imageOverlay.getCenter();
     var carMarker = L.marker(
@@ -206,10 +209,10 @@ function calculateDistance(x1, y1, x2, y2) {
             cU = cNE.lat - imageHeight / 4;
             cD = cSW.lat + imageHeight / 4;
         
-            console.log("CR", cR);
-            console.log("CL", cL);
-            console.log("CU", cU);
-            console.log("CD", cD);
+            // console.log("CR", cR);
+            // console.log("CL", cL);
+            // console.log("CU", cU);
+            // console.log("CD", cD);
 
             createMapOV = false;
             center = chooseRoad.getCenter();
