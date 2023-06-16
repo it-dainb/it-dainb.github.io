@@ -1,7 +1,6 @@
-
 // var API = 'https://teamabcd.digitalauto.tech/api/data';
-var API = 'https://it-dainb-github-io.vercel.app/api/data';
-// var API = 'http://127.0.0.1:8090/api/data';
+// var API = 'https://it-dainb-github-io.vercel.app/api/data';
+var API = 'http://127.0.0.1:8090/api/data';
 
 var carList = {}; // Array to store cars
 
@@ -39,7 +38,7 @@ async function sendData(car, box, carList, pre_document) {
         dicision: car.dicision
     };
 
-    console.log("SEND DATA")
+    // console.log("SEND DATA")
     try {
         const response = await fetch(API, {
             method: "POST",
@@ -144,7 +143,7 @@ async function sendData(car, box, carList, pre_document) {
             let carID = collision_ID[i];
             let carTemp = carList[carID];
             
-            // Giam toc khi xe dang truoc speed < xe minh
+            // Giam toc khi xe dang truoc speed < xe minh | xe minh speed > 0
             if (carTemp.heading === car.heading) {
                 if (car.heading === 'east' || car.heading === 'west') {
                     if (carTemp.speed < car.speed && head_map[car.heading] * (carTemp.getX() - car.getX()) > 0) {
@@ -208,10 +207,10 @@ async function sendData(car, box, carList, pre_document) {
         // console.log(dicision);
         if (dicision === 1) {
             car.speed -= 0.05 * car.speed;
-            console.log("SPEED DOWN");
+            // console.log("SPEED DOWN");
         } else if (dicision === 2) {
             car.stop()
-            console.log("STOPPPPP");
+            // console.log("STOPPPPP");
         }
 
         car.dicision = dicision;
@@ -222,7 +221,7 @@ async function sendData(car, box, carList, pre_document) {
 
         sendData(car, box, carList, pre_document);
     } catch (error) {
-        console.log("ERROR SEND AGAIN 50ms");
+        // console.log("ERROR SEND AGAIN 50ms");
         console.log(error);
         setTimeout(() => {
             sendData(car, box, carList, pre_document);
@@ -644,6 +643,8 @@ class Car {
 
     setPos(pos) {
         this.marker.setLatLng(pos);
+        this.window.map.panTo(pos);
+        // this.update(this.window.map);
     }
 
     update(map, autoPan = true) {
@@ -743,6 +744,38 @@ class Car {
 
 var car;
 
+function simulatorInit(simulator, car) {
+    simulator("Vehicle.ADAS.CruiseControl.SpeedSet", "set", ({ args }) => {
+        const [value] = args;
+        // myCar.speed = int(value);
+        car.speed = value;
+    });
+    
+    simulator("Vehicle.CurrentLocation.Latitude", "get", () => {
+        return car.getY();
+    });
+    
+    simulator("Vehicle.CurrentLocation.Longitude", "get", () => {
+        return car.getX();
+    });
+
+    simulator("Vehicle.Speed", "get", () => {
+        return car.speed;
+    });
+
+    simulator("Vehicle.CurrentLocation.Heading", "get", () => {
+        if (car.angle === 0 || car.angle === 360) {
+            return car.angle;
+        }
+
+        if (car.angle % 360 === 0) {
+            return 360;
+        }
+
+        return car.angle % 360;
+    })
+}
+
 const map = ({ widgets, simulator, vehicle }) => {
     var iframe_head = `
     <style>
@@ -786,6 +819,51 @@ const map = ({ widgets, simulator, vehicle }) => {
             '</body>' +
             '</html>';
     
+    let latitude = 200;
+    let longitude = 200;
+
+    latitude = parseInt(prompt("Enter latitude (0 - 500): ", "210"));
+    while (latitude < 0 || latitude > 500) {
+        latitude = parseInt(prompt("Enter latitude (0 - 500): ", "210"));
+    }
+    
+    let angle;
+    if (latitude <= 300 && latitude >= 200) {
+        longitude = parseInt(prompt("Enter longitude (200 - 300): ", "200"));
+        while (longitude < 200 || longitude > 300) {
+            longitude = parseInt(prompt("Enter longitude (200 - 300): ", "200"));
+        }
+        if (latitude > 250) {
+            angle = 90;
+        } else {
+            angle = -90;
+        }
+
+        if (latitude === 200) {
+            angle = 180;
+        } else if (latitude === 300) {
+            angle = 0;
+        }
+
+    } else {
+        longitude = parseInt(prompt("Enter longitude (0 - 500): ", "200"));
+        while (longitude < 0 || longitude > 500) {
+            longitude = parseInt(prompt("Enter longitude (0 - 500): ", "200"));
+        }
+
+        if (longitude > 250) {
+            angle = 180;
+        } else {
+            angle = 0;
+        }
+    }
+
+
+    // let autoPri = confirm("Use auto priority?");
+
+    // console.log(person);
+    
+    
     widgets.register("map", (box) => {
         let box_window = box.window;
         let box_iframe = box_window.frameElement;
@@ -804,6 +882,12 @@ const map = ({ widgets, simulator, vehicle }) => {
 
             // map.setZoom(1.5);
             car = new Car(box_window, carMarker, box_window.circle);
+            car.setRotationAngle(angle);
+            car.setPos([latitude, longitude]);
+            car.update(map);
+            // car.autoPri = autoPri;
+
+            simulatorInit(simulator, car);
 
             window.car = car;
             // window.testCar = box_obj.createCar([300, 200]);;
@@ -880,6 +964,19 @@ const map = ({ widgets, simulator, vehicle }) => {
         });
 
     });
+
+    // return {
+    //     setPos: (text) => {
+    //         if (print !== null) {
+    //             print(text)
+    //         }
+    //     },
+    //     reset: () => {
+    //         if (reset !== null) {
+    //             reset()
+    //         }
+    //     }
+    // }
 
 };
 

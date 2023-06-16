@@ -113,8 +113,7 @@ def handle_data():
 
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=8080, threaded=True)
-    port = int(os.environ.get('PORT', 8090))
-    print("Start server on port: ", port)
+    print("Start server")
 
     http_server = WSGIServer(('0.0.0.0', 8090), app, log=None)
     # http_server = WSGIServer(('0.0.0.0', port), app)
