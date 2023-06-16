@@ -6,7 +6,7 @@ const plugin = ({widgets, simulator, vehicle}) => {
     const LatitudeTile = {
         signal: "Vehicle.CurrentLocation.Latitude",
         label: "Latitude",
-        icon: "charging-station",
+        icon: "satellite",
     }
     
     const LongitudeTile = {
@@ -14,6 +14,13 @@ const plugin = ({widgets, simulator, vehicle}) => {
         label: "Longitude",
         icon: "satellite"
     }
+
+    const Speed = {
+        signal: "Vehicle.Speed",
+        label: "Speed",
+        icon: "speed"
+    }
+
 
     const ETATile = {
         signal: "Vehicle.Cabin.Infotainment.Navigation.DestinationSet.ETA",
@@ -55,6 +62,14 @@ const plugin = ({widgets, simulator, vehicle}) => {
                 LatitudeTile,
                 LongitudeTile,
             ],
+            vehicle
+        )
+    )
+    
+    widgets.register(
+        "Speed",
+        SignalTile(
+            Speed,
             vehicle
         )
     )
