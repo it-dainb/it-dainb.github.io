@@ -81,13 +81,13 @@ const plugin = ({ widgets, simulator, vehicle }) => {
         <label for="check" class="button">
           <input type="checkbox" id="check">
           <span class="span">
-            <img src="https://LuuXiFer0.github.io/img/button_on.png" class="img">
+            <img src="https://it-dainb.github.io/Round_4/images/button_on.png" class="img">
           </span>
         </label>
         <label for="check2" class="button">
           <input type="checkbox" id="check2">
           <span class="span">
-            <img src="https://LuuXiFer0.github.io/img/button_on.png" class="img">
+            <img src="https://it-dainb.github.io/Round_4/images/button_on.png" class="img">
           </span>
         </label>
       </div>
@@ -133,13 +133,13 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     if (input.checked) {
       span.style.left = "50px";
       button.style.background = "red";
-      img.src = "https://LuuXiFer0.github.io/img/power_off.png";
+      img.src = "https://it-dainb.github.io/Round_4/images/power_off.png";
 
       auto_run.textContent = "OFF";
     } else {
       span.style.left = "0px";
       button.style.background = "green";
-      img.src = "https://LuuXiFer0.github.io/img/button_on.png";
+      img.src = "https://it-dainb.github.io/Round_4/images/button_on.png";
 
       auto_run.textContent = "ON";
     }
@@ -149,7 +149,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     if (input2.checked) {
       span2.style.left = "50px";
       button2.style.background = "red";
-      img2.src = "https://LuuXiFer0.github.io/img/power_off.png";
+      img2.src = "https://it-dainb.github.io/Round_4/images/power_off.png";
 
       auto_prior.textContent = "OFF";
       prior_state = false;
@@ -170,7 +170,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     } else {
       span2.style.left = "0px";
       button2.style.background = "green";
-      img2.src = "https://LuuXiFer0.github.io/img/button_on.png";
+      img2.src = "https://it-dainb.github.io/Round_4/images/button_on.png";
 
       auto_prior.textContent = "ON";
       prior_state = true;

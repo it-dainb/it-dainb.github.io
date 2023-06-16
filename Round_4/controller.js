@@ -93,9 +93,9 @@ const plugin = ({ widgets, simulator, vehicle }) => {
       <div id="btn_down" class="button down">D</div>
       <div id="btn_left" class="button left">L</div>
       <div id="btn_right" class="button right">R</div>
-      <img id="btn_brake1" class="button img1" src="https://LuuXiFer0.github.io/img/handbrake.png" alt="Brake">
-      <img id="btn_brake2" class="button img2" src="https://LuuXiFer0.github.io/img/reverse-handbrake.png" alt="Brake">
-      <img id="btn_brake3" class="button img3" src="https://LuuXiFer0.github.io/img/bottom-handbrake.png" alt="Brake">
+      <img id="btn_brake1" class="button img1" src="https://it-dainb.github.io/Round_4/images/handbrake.png" alt="Brake">
+      <img id="btn_brake2" class="button img2" src="https://it-dainb.github.io/Round_4/images/reverse-handbrake.png" alt="Brake">
+      <img id="btn_brake3" class="button img3" src="https://it-dainb.github.io/Round_4/images/bottom-handbrake.png" alt="Brake">
     </div>
   `;
 

@@ -1,9 +1,5 @@
-import SimulatorPlugins from "./reusable/SimulatorPlugins.js"
 import SignalPills from "./reusable/SignalPills.js"
-import GoogleMapsFromSignal from "./reusable/GoogleMapsFromSignal.js"
 import SignalTile from "./reusable/SignalTile.js"
-import LineChart from "./reusable/LineChart.js"
-import { PLUGINS_APIKEY } from "./reusable/apikey.js";
 
 const plugin = ({widgets, simulator, vehicle}) => {
 
@@ -51,6 +47,7 @@ const plugin = ({widgets, simulator, vehicle}) => {
             vehicle
         )
     )
+    
     widgets.register(
         "LatLongPills",
         SignalPills(
