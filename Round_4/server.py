@@ -106,8 +106,13 @@ def handle_data():
                 'carY': cars[data["ID"]]["y"],
                 'turn': cars[data["ID"]]["turn"],
                 'angle': cars[data["ID"]]["angle"]}
+    response = jsonify(response)
     
-    return jsonify(response)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'append,delete,entries,foreach,get,has,keys,set,values,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    
+    return response
 
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=8080, threaded=True)
