@@ -81,13 +81,13 @@ function calculateDistance(x1, y1, x2, y2) {
     var red = '#f3252e';
     var yellow = '#fbff32'
 
-    var root_radius = 70
+    var root_radius = 120;
     var circle = L.circle(
         carMarker.getLatLng(), {
         color: 'red',
         fillColor: red,
         fillOpacity: 0.4,
-        radius: 70,
+        radius: root_radius,
         weight: 1,
     }).addTo(map);
 
@@ -178,8 +178,8 @@ function calculateDistance(x1, y1, x2, y2) {
 ;
 
     var radius = 1;
-    var radius_speed = root_radius / 6 / 1000 * 10;
-    var radius_min = 60;
+    var radius_speed = root_radius / 12 / 1000 * 10;
+    var radius_min = root_radius - 5;
     
     var count_cross = -1;
     var oneTime = true;

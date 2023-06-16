@@ -1,3 +1,126 @@
+
+var carList = {}; // Array to store cars
+
+window.carList = carList;
+
+var pre_document = document.hidden;
+
+async function sendData(car, box, carList, pre_document) {
+    // console.log(car);
+    var carListPos = {};
+
+    for (let car_ID in carList) {
+        carListPos[car_ID] = {};
+        carListPos[car_ID]["x"] = carList[car_ID].getX();
+        carListPos[car_ID]["y"] = carList[car_ID].getY();
+    }
+
+    let data = {
+        ID: car.ID,
+        x: car.getX(),
+        y: car.getY(),
+        speed: car.speed,
+        angle: car.angle,
+        turn: car.turn,
+        carList: carListPos,
+        hidden: document.hidden,
+    };
+
+    // console.log("SEND DATA")
+    try {
+        const response = await fetch("http://127.0.0.1:8080/api/data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        const responseData = await response.json();
+
+        if (car.ID === null) {
+            car.ID = responseData.ID;
+            console.log("MY ID", car.ID);
+        }
+        
+        if (pre_document === true && document.hidden === false) {
+            car.setPos([responseData.carY, responseData.carX]);
+            console.log("SET NEW");
+        }
+
+        var carRemove = responseData.Remove_car;
+        // console.log(responseData.cars);
+
+        for (const ID in responseData.cars) {
+            const car_data = responseData.cars[ID];
+            // console.log(carRemove)
+
+            // if (car_data.ID === car.ID) {
+            //     continue;
+            // }
+
+            let tempCar = null;
+            if (!(car_data.ID in carList)) {
+                console.log("CREATE CAR", car_data.ID);
+                tempCar = box.createCar([car_data.y, car_data.x]);
+                carList[car_data.ID] = tempCar;
+            } else {
+                tempCar = carList[car_data.ID];
+            }
+            
+            
+            if ((pre_document === true && document.hidden === false) || tempCar.ID === null) {
+                console.log("SYNC")
+                
+                if (tempCar.ID === null) {
+
+                    tempCar.ID = car_data.ID;
+                }
+                tempCar.setPos([car_data.y, car_data.x]);
+    
+                tempCar.angle = car_data.angle;
+                tempCar.speed = car_data.speed;
+                tempCar.turn = car_data.turn;
+    
+                tempCar.rotate(tempCar.angle)
+            }
+
+            if (tempCar.turn === 's') {
+                tempCar.turnOff();
+            } else if (tempCar.turn === 'r') {
+                tempCar.turnRight();
+            } else {
+                tempCar.turnLeft();
+            }
+        }
+
+        // console.log(carList);
+        // console.log(carRemove);
+        // console.log(carList);
+        for (let idx in carRemove) {
+            let carRID = carRemove[idx];
+            for (let key in carList) {
+                if (parseInt(key) === parseInt(carRID)) {
+                    console.log("REMOVE CAR", carRID);
+                    carList[key].remove();
+                    delete carList[key];
+                    break;
+                }
+            }
+        }
+
+        if (document.hidden !== pre_document) {
+            pre_document = document.hidden;
+        }
+
+        sendData(car, box, carList, pre_document);
+    } catch (error) {
+        console.log("ERROR SEND AGAIN 50ms");
+        console.log(error);
+        setTimeout(() => {
+            sendData(car, box, carList, pre_document);
+        }, 50); // Retry after 1 second
+    }
+}
+
 function calculateDistance(point_1, point_2) {
     // Calculate the differences between the coordinates
     var x1 = point_1.lng;
@@ -189,8 +312,8 @@ var head_map = {
 }
 
 class Box {
-    constructor(element) {
-        this.window = element;
+    constructor(window) {
+        this.window = window;
     }
 
     createCar(pos, name = "car") {
@@ -219,26 +342,36 @@ class Box {
 }
 
 class Car {
-    constructor(window, element, zone = null) {
-        this.element = element;
+    constructor(window, marker, zone = null) {
+        this.marker = marker;
         this.speed = 0;
-        this.angle = element.options.rotationAngle;
+        this.angle = marker.options.rotationAngle;
         
         this.heading = findHeading(this.angle);
-        this.pos = this.element.getLatLng();
+        this.pos = this.marker.getLatLng();
         this.L = window.L;
         this.zone = zone;
         this.turn = "s";
         this.canTurn = false;
-        this.signal = new TurnSignal(element, window);
+        this.signal = new TurnSignal(marker, window);
         this.window = window;
         
         this.status = null;
         this.turn_around = null;
+
+        this.ID = null;
+    }
+
+    getX() {
+        return this.getPos().lng;
+    }
+
+    getY() {
+        return this.getPos().lat;
     }
 
     getPos() {
-        return this.element.getLatLng();
+        return this.marker.getLatLng();
     }
 
     move(speed) {
@@ -251,19 +384,29 @@ class Car {
 
     rotate(angle) {
         this.angle += angle;
-        this.element.setRotationAngle(this.angle);
+        this.marker.setRotationAngle(this.angle);
 
         this.heading = findHeading(this.angle);
     }
 
     turnRight() {
         this.turn = 'r';
-        this.signal.turnRight();
+        if (!this.signal.isTurnedOn) {
+            this.signal.turnRight();
+        }
     }
     
     turnLeft() {
         this.turn = 'l'
-        this.signal.turnLeft();
+        if (!this.signal.isTurnedOn) {
+            this.signal.turnLeft();
+        }
+    }
+
+    turnOff() {
+        if (this.signal.isTurnedOn) {
+            this.signal.turnOff();
+        }
     }
 
     updateTurn() {
@@ -330,14 +473,13 @@ class Car {
     }
 
     setPos(pos) {
-        this.element.setLatLng(pos);
+        this.marker.setLatLng(pos);
     }
 
-    update(map) {
+    update(map, autoPan = true) {
         this.updateTurn();
 
-
-        let pos = this.element.getLatLng();
+        let pos = this.marker.getLatLng();
         let speed = this.speed / 1000 * 10;
         let angle = this.angle * Math.PI / 180;
 
@@ -346,7 +488,9 @@ class Car {
         this.setPos(pos);
         this.signal.updatePos();
 
-        map.panTo(pos);
+        if (autoPan) {
+            map.panTo(pos);
+        }
     }
 
     changeColor(color) {
@@ -354,7 +498,7 @@ class Car {
     }
 
     collisionDetect(car) {
-        var point = car.element.getLatLng();
+        var point = car.getPos();
 
         var distance = calculateDistance(point, this.zone.getLatLng());
         // console.log(point);
@@ -395,6 +539,11 @@ class Car {
             this.turn_around = Math.abs(car_point.lng - cX) * 2;
 
         }
+    }
+
+    remove() {
+        this.turnOff();
+        this.marker.remove();
     }
 }
 
@@ -483,17 +632,58 @@ const map = ({ widgets, simulator, vehicle }) => {
             // resizeMap();
             
             box_window.addEventListener("resize", resizeMap);
+
+            // // Create a new Web Worker with an inline function
+            // var worker = new Worker(URL.createObjectURL(
+            //     new Blob([`
+            //     self.onmessage = function(event) {
+            //         if (event.data.type === 'start') {
+            //         startUpdates(event.data.map, event.data.canTurn, event.data.car);
+            //         }
+            //     }
+            
+            //     function startUpdates(map, canTurn, car) {
+            //         setInterval(function() {
+            //         // Perform your update logic here
+            //             // carUpdate(car, map, canTurn);
+            //         }, 10); // Update every 10 milliseconds
+            //     }
+            
+            //     function carUpdate(car, map, canTurn) {
+            //         // Perform the car.update(map) logic here using the canTurn and map variables
+            //         car.canTurn = canTurn;
+            //         car.update(map);
+
+            //         self.postMessage({ map: map, car: car }); // Notify the main script about the update and send the canTurn value
+            //     }
+            //     `], { type: 'text/javascript' })
+            // ));
+            
+            // // Listen for messages from the Web Worker
+            // worker.onmessage = function(event) {
+            //     // car = event.data.car;
+            //     // Handle the updatedCanTurn received from the Web Worker
+            //     console.log('update');
+            // };
+            
+            // // Start the updates and pass the canTurn value and map to the Web Worker
+            // worker.postMessage({ map: box_window.map, canTurn: box_window.canTurn, car: car, type: 'start' });
+        
             // Access the carMarker variable here
             setInterval(() => {
                 // console.log(box_window.canTurn);
                 car.canTurn = box_window.canTurn;
-
-
-
-
                 car.update(map);
+
+                for (let carID in carList) {
+                    carList[carID].update(map, false);
+                }
             }, 10)
+            
+            // send data
+            sendData(car, box_obj, carList, pre_document);
         });
+
     });
 
 };
