@@ -643,7 +643,6 @@ class Car {
 
     setPos(pos) {
         this.marker.setLatLng(pos);
-        this.window.map.panTo(pos);
         // this.update(this.window.map);
     }
 
@@ -819,50 +818,67 @@ const map = ({ widgets, simulator, vehicle }) => {
             '</body>' +
             '</html>';
     
-    let latitude = 200;
-    let longitude = 200;
-
-    latitude = parseInt(prompt("Enter latitude (0 - 500): ", "210"));
-    while (latitude < 0 || latitude > 500) {
-        latitude = parseInt(prompt("Enter latitude (0 - 500): ", "210"));
-    }
-    
-    let angle;
-    if (latitude <= 300 && latitude >= 200) {
-        longitude = parseInt(prompt("Enter longitude (200 - 300): ", "200"));
-        while (longitude < 200 || longitude > 300) {
-            longitude = parseInt(prompt("Enter longitude (200 - 300): ", "200"));
-        }
-        if (latitude > 250) {
-            angle = 90;
-        } else {
-            angle = -90;
-        }
-
-        if (latitude === 200) {
-            angle = 180;
-        } else if (latitude === 300) {
-            angle = 0;
-        }
-
-    } else {
-        longitude = parseInt(prompt("Enter longitude (0 - 500): ", "200"));
-        while (longitude < 0 || longitude > 500) {
-            longitude = parseInt(prompt("Enter longitude (0 - 500): ", "200"));
-        }
-
-        if (longitude > 250) {
-            angle = 180;
-        } else {
-            angle = 0;
-        }
+    let lane = parseInt(prompt("Enter the lane you want to put the car in (1 - 4):", "1"));
+    while(lane < 1 || lane > 4) {
+        lane = parseInt(prompt("Enter the lane you want to put the car in (1 - 4):", "1"));
     }
 
+    var bound_lane = {
+        1: [[200, 0], [250, 500]],
+        2: [[250, 0], [300, 500]],
+        3: [[0, 200], [500, 250]],
+        4: [[0, 250], [500, 300]],
+    }
 
-    // let autoPri = confirm("Use auto priority?");
+    var angle_lane = {
+        1: 0,
+        2: 180,
+        3: 90,
+        4: -90,
+    }
 
-    // console.log(person);
+    var bound = bound_lane[lane]
+    let latitude = parseInt(prompt("Enter latitude (" + bound[0][0] + " - " + bound[1][0]  +  ")", bound[0][0]));
+    while (latitude < bound[0][0] || latitude > bound[1][0]) {
+        latitude = parseInt(prompt("Enter latitude (" + bound[0][0] + " - " + bound[1][0]  +  ")", bound[0][0]));
+    }
+
+    let longitude = parseInt(prompt("Enter longitude (" + bound[0][1] + " - " + bound[1][1]  +  ")", bound[0][1]));
+    while (longitude < bound[0][1] || longitude > bound[1][1]) {
+        longitude = parseInt(prompt("Enter longitude (" + bound[0][1] + " - " + bound[1][1]  +  ")", bound[0][1]));
+    }
+
+    if (latitude === 200) {
+        latitude += 20;
+    } else if (latitude === 300) {
+        latitude -= 20;
+    }
+
+    if (longitude === 200) {
+        longitude += 20;
+    } else if (longitude === 300) {
+        longitude -= 20;
+    }
+
+    if (latitude === 250) {
+        if (lane === 1) {
+            latitude -= 20;
+        } else if (lane === 2) {
+            latitude += 20;
+        }
+    }
     
+    if (longitude === 250) {
+        if (lane === 3) {
+            longitude -= 20;
+        } else if (lane === 4) {
+            longitude += 20;
+        }
+            
+    }
+
+    console.log(lane);
+
     
     widgets.register("map", (box) => {
         let box_window = box.window;
@@ -882,7 +898,9 @@ const map = ({ widgets, simulator, vehicle }) => {
 
             // map.setZoom(1.5);
             car = new Car(box_window, carMarker, box_window.circle);
-            car.setRotationAngle(angle);
+            console.log(angle_lane[lane])
+            car.angle = angle_lane[lane];
+            car.setRotationAngle();
             car.setPos([latitude, longitude]);
             car.update(map);
             // car.autoPri = autoPri;
@@ -965,18 +983,14 @@ const map = ({ widgets, simulator, vehicle }) => {
 
     });
 
-    // return {
-    //     setPos: (text) => {
-    //         if (print !== null) {
-    //             print(text)
-    //         }
-    //     },
-    //     reset: () => {
-    //         if (reset !== null) {
-    //             reset()
-    //         }
-    //     }
-    // }
+    return {
+        createCar: (pos, name) => {
+            let box_car =  window.box.createCar(pos, name);
+            // sendData(box_car, window.box, window.carList, pre_document);
+
+            return box_car;
+        }
+    }
 
 };
 
