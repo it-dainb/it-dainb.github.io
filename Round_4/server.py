@@ -2,7 +2,7 @@ import copy
 from gevent.pywsgi import WSGIServer
 
 from flask import Flask, request, jsonify, make_response
-from flask_cors import CORS, cross_origin
+# from flask_cors import CORS, cross_origin
 import time
 
 # import logging
@@ -10,8 +10,8 @@ import time
 # logging.getLogger('gevent').setLevel(logging.ERROR)
 
 app = Flask(__name__)
-CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+# CORS(app)
+# app.config['CORS_HEADERS'] = 'Content-Type'
 
 i = 0
 elapsed_time = None
@@ -35,7 +35,7 @@ def _corsify_actual_response(response):
     return response
 
 @app.route('/api/data', methods=['POST', 'OPTIONS'])
-@cross_origin()
+# @cross_origin()
 def handle_data():
     global current_id, cars
     if request.method == "OPTIONS": # CORS preflight
