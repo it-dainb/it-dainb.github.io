@@ -13,6 +13,8 @@ async function sendData(car, box, carList, pre_document) {
         carListPos[car_ID] = {};
         carListPos[car_ID]["x"] = carList[car_ID].getX();
         carListPos[car_ID]["y"] = carList[car_ID].getY();
+        carListPos[car_ID]["turn"] = carList[car_ID].turn;
+        carListPos[car_ID]["angle"] = carList[car_ID].angle;
     }
 
     let data = {
@@ -24,6 +26,7 @@ async function sendData(car, box, carList, pre_document) {
         turn: car.turn,
         carList: carListPos,
         hidden: document.hidden,
+        priority: car.priority,
     };
 
     // console.log("SEND DATA")
@@ -43,6 +46,17 @@ async function sendData(car, box, carList, pre_document) {
         
         if (pre_document === true && document.hidden === false) {
             car.setPos([responseData.carY, responseData.carX]);
+            car.turn = responseData.turn;
+            car.angle = responseData.angle;
+            car.setRotationAngle();
+
+            if (car.turn === 's') {
+                car.turnOff();
+            } else if (car.turn === 'r') {
+                car.turnRight();
+            } else {
+                car.turnLeft();
+            }
             console.log("SET NEW");
         }
 
@@ -64,6 +78,7 @@ async function sendData(car, box, carList, pre_document) {
                 carList[car_data.ID] = tempCar;
             } else {
                 tempCar = carList[car_data.ID];
+                tempCar.priority = car_data.priority;
             }
             
             
@@ -71,16 +86,16 @@ async function sendData(car, box, carList, pre_document) {
                 console.log("SYNC")
                 
                 if (tempCar.ID === null) {
-
                     tempCar.ID = car_data.ID;
                 }
+
                 tempCar.setPos([car_data.y, car_data.x]);
     
                 tempCar.angle = car_data.angle;
                 tempCar.speed = car_data.speed;
                 tempCar.turn = car_data.turn;
-    
-                tempCar.rotate(tempCar.angle)
+                
+                tempCar.setRotationAngle();
             }
 
             if (tempCar.turn === 's') {
@@ -352,7 +367,6 @@ class Car {
         this.L = window.L;
         this.zone = zone;
         this.turn = "s";
-        this.canTurn = false;
         this.signal = new TurnSignal(marker, window);
         this.window = window;
         
@@ -360,6 +374,42 @@ class Car {
         this.turn_around = null;
 
         this.ID = null;
+        this.priority = null;
+
+        this.count_cross = -1;
+        this.oneTime = true;
+    }
+
+    canTurn() {
+        var distance = calculateDistance(this.getPos(), this.carCenterMap());
+
+        var canTurnBool = false;
+        if (36 < distance && distance < 40) {
+            // console.log(distance);
+            canTurnBool = true;
+
+            if (this.oneTime) {
+                this.count_cross += 1;
+                this.oneTime = false;
+            }
+        } else {
+            if (this.count_cross === -1 || distance > 50 || this.count_cross === 2) {
+                this.count_cross = 0;
+            }
+
+            // changeColor("y");
+            this.oneTime = true;
+        }
+
+        return canTurnBool;
+        
+    }
+
+    carCenterMap() {
+        var mX = Math.floor(car.getX() / 250 / 2) * 500 + 250;
+        var mY = Math.floor(car.getY() / 250 / 2) * 500 + 250;
+
+        return this.L.latLng([mY, mX]);
     }
 
     getX() {
@@ -382,11 +432,14 @@ class Car {
         this.speed = 0;
     }
 
+    setRotationAngle() {
+        this.marker.setRotationAngle(this.angle);
+        this.heading = findHeading(this.angle);
+    }
+
     rotate(angle) {
         this.angle += angle;
-        this.marker.setRotationAngle(this.angle);
-
-        this.heading = findHeading(this.angle);
+        this.setRotationAngle();
     }
 
     turnRight() {
@@ -414,13 +467,13 @@ class Car {
             return;
         }
 
-        if (this.turn === 'r' && !this.canTurn) {
+        if (this.turn === 'r' && !this.canTurn()) {
             return;
         }
 
         var distance = calculateDistance(this.getPos(), this.window.chooseRoad.getCenter());
 
-        if (this.status === null && this.canTurn === false && distance > 200) {
+        if (this.status === null && this.canTurn() === false && distance > 200) {
             // console.log("TURN");
             this.turnAround();
             if (this.turn === 'r') {
@@ -451,12 +504,10 @@ class Car {
         }
 
 
-        if (this.canTurn) {
-            let count_cross = this.window.count_cross;
-
+        if (this.canTurn()) {
             // console.log(count_cross);
 
-            if (count_cross == 1 && this.turn === 'l') {
+            if (this.count_cross == 1 && this.turn === 'l') {
                 return;
             }
 
@@ -509,15 +560,17 @@ class Car {
             
             if (distance < this.zone.getRadius() / 2 + 20) {
                 this.changeColor('r');
-                console.log("STOP");
-                return;
+                // console.log("STOP");
+                return 'stop';
             }
 
             this.changeColor('y');
-            console.log("SLOW");
+            // console.log("SLOW");
+            return 'slow';
         } else {
-            console.log("GOOO");
+            // console.log("GOOO");
             this.changeColor('g');
+            return 'go';
         }
     }
 
@@ -672,11 +725,12 @@ const map = ({ widgets, simulator, vehicle }) => {
             // Access the carMarker variable here
             setInterval(() => {
                 // console.log(box_window.canTurn);
-                car.canTurn = box_window.canTurn;
                 car.update(map);
 
                 for (let carID in carList) {
-                    carList[carID].update(map, false);
+                    let tempCar = carList[carID];
+                
+                    tempCar.update(map, false);
                 }
             }, 10)
             

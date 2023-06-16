@@ -124,8 +124,8 @@ function calculateDistance(x1, y1, x2, y2) {
         let southWest = imgBounds.getSouthWest();
         let northEast = imgBounds.getNorthEast();
 
-        let upImage = L.imageOverlay(imageURL, L.latLngBounds([northEast.lat - 4, southWest.lng], [northEast.lat + imageHeight, northEast.lng]), imageOptions).addTo(map);
-        let downImage = L.imageOverlay(imageURL, L.latLngBounds([southWest.lat  - imageHeight, southWest.lng], [southWest.lat + 4, northEast.lng]), imageOptions).addTo(map);
+        let upImage = L.imageOverlay(imageURL, L.latLngBounds([northEast.lat, southWest.lng], [northEast.lat + imageHeight, northEast.lng]), imageOptions).addTo(map);
+        let downImage = L.imageOverlay(imageURL, L.latLngBounds([southWest.lat  - imageHeight, southWest.lng], [southWest.lat, northEast.lng]), imageOptions).addTo(map);
         return [upImage, downImage];
     };
 
@@ -134,8 +134,8 @@ function calculateDistance(x1, y1, x2, y2) {
         let southWest = imgBounds.getSouthWest();
         let northEast = imgBounds.getNorthEast();
 
-        let leftImage = L.imageOverlay(imageURL, L.latLngBounds([southWest.lat, southWest.lng - imageWidth], [northEast.lat, southWest.lng + 4]), imageOptions).addTo(map);
-        let rightImage = L.imageOverlay(imageURL, L.latLngBounds([southWest.lat, northEast.lng - 4], [northEast.lat, northEast.lng + imageWidth]), imageOptions).addTo(map);
+        let leftImage = L.imageOverlay(imageURL, L.latLngBounds([southWest.lat, southWest.lng - imageWidth], [northEast.lat, southWest.lng]), imageOptions).addTo(map);
+        let rightImage = L.imageOverlay(imageURL, L.latLngBounds([southWest.lat, northEast.lng], [northEast.lat, northEast.lng + imageWidth]), imageOptions).addTo(map);
         return [leftImage, rightImage];
     }
     
@@ -169,8 +169,6 @@ function calculateDistance(x1, y1, x2, y2) {
 
     var carX, carY;
 
-    var canTurn;
-
     // console.log(circle);
 
     // carMarker.setRotationAngle(90);
@@ -180,9 +178,6 @@ function calculateDistance(x1, y1, x2, y2) {
     var radius = 1;
     var radius_speed = root_radius / 12 / 1000 * 10;
     var radius_min = root_radius - 5;
-    
-    var count_cross = -1;
-    var oneTime = true;
     setInterval(() => {
         
         carPosition = carMarker.getLatLng();
@@ -225,38 +220,8 @@ function calculateDistance(x1, y1, x2, y2) {
 
             createMapOV = false;
             center = chooseRoad.getCenter();
-            count_cross = -1;
+            // console.log(center)
         }
-
-        // console.log(center.lat);
-        // console.log(carY);
-        let distance = calculateDistance(center.lng, center.lat, carX, carY);
-        
-        canTurn = false;
-        // let distance = center.distanceTo(carPosition);
-        if (36 < distance && distance < 40) {
-            // console.log(distance);
-            canTurn = true;
-
-            if (oneTime) {
-                count_cross += 1;
-                oneTime = false;
-                // console.log(count_cross);
-            }
-
-            // console.log(canTurn);
-            // changeColor("g");
-        } else {
-            if (count_cross === -1 || distance > 50 || count_cross === 2) {
-                count_cross = 0;
-            }
-
-            // changeColor("y");
-            oneTime = true;
-        }
-
-        window.count_cross = count_cross;
-        window.canTurn = canTurn;
         
         if (!createMapOV && (!chooseRoad.getBounds().contains(carMarker.getLatLng()))) {
             if (carX > cR) {

@@ -45,7 +45,11 @@ def handle_data():
     
     if not cars[data["ID"]]["hidden"]:
         # if data["hidden"]:
-            # print(data["ID"], data)
+        #     print(data["ID"], data)
+        #     print()
+        #     print(data["carList"])
+        #     print("=====================")
+        #     print()
         cars[data["ID"]] = data
 
     cars_live[data["ID"]] = time.time()
@@ -58,6 +62,8 @@ def handle_data():
         for car_ID in data["carList"]:
             cars[car_ID]["x"] = data["carList"][car_ID]["x"]
             cars[car_ID]["y"] = data["carList"][car_ID]["y"]
+            cars[car_ID]["turn"] = data["carList"][car_ID]["turn"]
+            cars[car_ID]["angle"] = data["carList"][car_ID]["angle"]
     
     
     # for key, value in cars_live.items():
@@ -90,7 +96,9 @@ def handle_data():
     
     response = {'cars': cars_response, 'ID': data["ID"], 'Remove_car': remove_cars, 
                 'carX': cars[data["ID"]]["x"],
-                'carY': cars[data["ID"]]["y"]}
+                'carY': cars[data["ID"]]["y"],
+                'turn': cars[data["ID"]]["turn"],
+                'angle': cars[data["ID"]]["angle"]}
     
     return jsonify(response)
 
