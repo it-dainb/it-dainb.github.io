@@ -1,4 +1,7 @@
 
+var API = 'teamabcd@digitalauto.tech';
+// var API = 'http://127.0.0.1:8090/api/data';
+
 var carList = {}; // Array to store cars
 
 window.carList = carList;
@@ -37,7 +40,7 @@ async function sendData(car, box, carList, pre_document) {
 
     // console.log("SEND DATA")
     try {
-        const response = await fetch("http://127.0.0.1:8090/api/data", {
+        const response = await fetch(API, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
