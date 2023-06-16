@@ -2,7 +2,7 @@ import copy
 from gevent.pywsgi import WSGIServer
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import time
 
 # import logging
@@ -10,7 +10,7 @@ import time
 # logging.getLogger('gevent').setLevel(logging.ERROR)
 
 app = Flask(__name__)
-CORS(app, origins=['https://digitalauto.netlify.app'])
+CORS(app)
 
 i = 0
 elapsed_time = None
@@ -23,6 +23,7 @@ current_id = 0
 remove_cars = []
 
 @app.route('/api/data', methods=['POST'])
+@cross_origin()
 def handle_data():
     global current_id, cars
     
