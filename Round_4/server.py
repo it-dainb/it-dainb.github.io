@@ -1,3 +1,5 @@
+import os
+
 import copy
 from gevent.pywsgi import WSGIServer
 
@@ -111,8 +113,10 @@ def handle_data():
 
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=8080, threaded=True)
-    print("Start server")
+    port = int(os.environ.get('PORT', 8090))
+    print("Start server on port: ", port)
+
     # http_server = WSGIServer(('0.0.0.0', 8090), app, log=None)
-    http_server = WSGIServer(('0.0.0.0', 8090), app)
+    http_server = WSGIServer(('0.0.0.0', port), app)
     http_server.serve_forever()
     print("End server")
