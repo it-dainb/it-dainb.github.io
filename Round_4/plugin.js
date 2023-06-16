@@ -887,7 +887,8 @@ const map = ({ widgets, simulator, vehicle }) => {
         
         box_iframe.srcdoc = iframeContent;
 
-        box_iframe.addEventListener("load", () => {            
+        box_iframe.addEventListener("load", () => {        
+
             let carMarker = box_window.carMarker;
             let mapContainer = box_window.document.getElementById("map");
             let map = box_window.map;
