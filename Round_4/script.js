@@ -91,7 +91,7 @@ function calculateDistance(x1, y1, x2, y2) {
         weight: 1,
     }).addTo(map);
 
-    function changeColor(color) {
+    function changeColor(circle, color) {
 
         if (color === "r") {
             circle.setStyle({
@@ -111,6 +111,8 @@ function calculateDistance(x1, y1, x2, y2) {
         }
 
     }
+
+    changeColor(circle, 'g');
 
     window.changeColor = changeColor;
     window.circle = circle;
@@ -169,11 +171,18 @@ function calculateDistance(x1, y1, x2, y2) {
 
     var canTurn;
 
-    console.log(circle);
+    // console.log(circle);
+
+    // carMarker.setRotationAngle(90);
+    // console.log(carMarker.options.rotationAngle)
+;
 
     var radius = 1;
     var radius_speed = root_radius / 6 / 1000 * 10;
     var radius_min = 60;
+    
+    var count_cross = -1;
+    var oneTime = true;
     setInterval(() => {
         
         carPosition = carMarker.getLatLng();
@@ -216,6 +225,7 @@ function calculateDistance(x1, y1, x2, y2) {
 
             createMapOV = false;
             center = chooseRoad.getCenter();
+            count_cross = -1;
         }
 
         // console.log(center.lat);
@@ -227,36 +237,51 @@ function calculateDistance(x1, y1, x2, y2) {
         if (36 < distance && distance < 40) {
             // console.log(distance);
             canTurn = true;
+
+            if (oneTime) {
+                count_cross += 1;
+                oneTime = false;
+                // console.log(count_cross);
+            }
+
             // console.log(canTurn);
-            changeColor("g");
+            // changeColor("g");
         } else {
-            changeColor("y");
+            if (count_cross === -1 || distance > 50 || count_cross === 2) {
+                count_cross = 0;
+            }
+
+            // changeColor("y");
+            oneTime = true;
         }
 
+        window.count_cross = count_cross;
         window.canTurn = canTurn;
         
         if (!createMapOV && (!chooseRoad.getBounds().contains(carMarker.getLatLng()))) {
             if (carX > cR) {
-                console.log("ADD RIGHT");
+                // console.log("ADD RIGHT");
                 chooseRoad = R;
                 createMapOV = true;
             } else if (carX < ccL) {
-                console.log("ADD LEFT");
+                // console.log("ADD LEFT");
                 chooseRoad = cL;
                 createMapOV = true;
             }
             if (carY > cU) {
-                console.log("ADD UP");
+                // console.log("ADD UP");
                 chooseRoad = U;
                 createMapOV = true;
             } else if (carY < cD) {
-                console.log("ADD DOWN");
+                // console.log("ADD DOWN");
                 chooseRoad = D;
                 createMapOV = true;
             }
             
         }
         // console.log(createMapOV);
+
+        window.chooseRoad = chooseRoad;
         
     }, 10);
 
