@@ -3,7 +3,7 @@ from gevent.pywsgi import WSGIServer
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import time, math
+import time
 
 import logging
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
