@@ -38,7 +38,7 @@ async function sendData(car, box, carList, pre_document) {
         dicision: car.dicision
     };
 
-    // console.log("SEND DATA")
+    console.log("SEND DATA")
     try {
         const response = await fetch(API, {
             method: "POST",
