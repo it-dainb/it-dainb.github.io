@@ -1,5 +1,5 @@
 
-var API = 'teamabcd@digitalauto.tech';
+var API = 'https://teamabcd.digitalauto.tech';
 // var API = 'http://127.0.0.1:8090/api/data';
 
 var carList = {}; // Array to store cars
