@@ -107,16 +107,12 @@ def handle_data():
                 'turn': cars[data["ID"]]["turn"],
                 'angle': cars[data["ID"]]["angle"]}
     response = jsonify(response)
-    
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Headers'] = 'append,delete,entries,foreach,get,has,keys,set,values,Authorization'
-    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-    
+
     return response
 
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=8080, threaded=True)
     print("Start server")
-    http_server = WSGIServer(('0.0.0.0', 8090), app)
+    http_server = WSGIServer(('0.0.0.0', 8090), app, log = None)
     http_server.serve_forever()
     print("End server")
