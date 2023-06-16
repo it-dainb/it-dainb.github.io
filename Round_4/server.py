@@ -3,11 +3,11 @@ from gevent.pywsgi import WSGIServer
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import time, math
+import time
 
-import logging
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
-logging.getLogger('gevent').setLevel(logging.ERROR)
+# import logging
+# logging.getLogger('werkzeug').setLevel(logging.ERROR)
+# logging.getLogger('gevent').setLevel(logging.ERROR)
 
 app = Flask(__name__)
 CORS(app, origins=['https://digitalauto.netlify.app'])
@@ -112,6 +112,6 @@ def handle_data():
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=8080, threaded=True)
     print("Start server")
-    http_server = WSGIServer(('0.0.0.0', 8090), app, log=None)
+    http_server = WSGIServer(('0.0.0.0', 8090), app)
     http_server.serve_forever()
     print("End server")
