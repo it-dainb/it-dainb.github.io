@@ -5,6 +5,11 @@ window.carList = carList;
 
 var pre_document = document.hidden;
 
+function getRandomNumberInRange(a, b) {
+    var max = Math.pow(2, b);
+    return Math.floor(Math.random() * (max - a + 1)) + a;
+}
+
 async function sendData(car, box, carList, pre_document) {
     // console.log(car);
     var carListPos = {};
@@ -27,11 +32,12 @@ async function sendData(car, box, carList, pre_document) {
         carList: carListPos,
         hidden: document.hidden,
         priority: car.priority,
+        dicision: car.dicision
     };
 
     // console.log("SEND DATA")
     try {
-        const response = await fetch("http://127.0.0.1:8080/api/data", {
+        const response = await fetch("http://127.0.0.1:8090/api/data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -78,9 +84,10 @@ async function sendData(car, box, carList, pre_document) {
                 carList[car_data.ID] = tempCar;
             } else {
                 tempCar = carList[car_data.ID];
-                tempCar.priority = car_data.priority;
             }
             
+            tempCar.priority = car_data.priority;
+            tempCar.dicision = car_data.dicision;
             
             if ((pre_document === true && document.hidden === false) || tempCar.ID === null) {
                 console.log("SYNC")
@@ -105,6 +112,10 @@ async function sendData(car, box, carList, pre_document) {
             } else {
                 tempCar.turnLeft();
             }
+
+            if (tempCar.dicision !== 0) {
+                tempCar.speed = car_data.speed;
+            }
         }
 
         // console.log(carList);
@@ -121,6 +132,85 @@ async function sendData(car, box, carList, pre_document) {
                 }
             }
         }
+
+        var collision_ID = car.collisionDetect(carList);
+        
+        // Case 2 xe cung chieu va xe collision o dang truoc
+        for (var i = 0; i < collision_ID.length; i++) {
+            let carID = collision_ID[i];
+            let carTemp = carList[carID];
+            
+            // Giam toc khi xe dang truoc speed < xe minh
+            if (carTemp.heading === car.heading) {
+                if (car.heading === 'east' || car.heading === 'west') {
+                    if (carTemp.speed < car.speed && head_map[car.heading] * (carTemp.getX() - car.getX()) > 0) {
+                        car.priority = carTemp.priority - 1;
+                    }
+                } else {
+                    if (carTemp.speed < car.speed && head_map[car.heading] * (carTemp.getY() - car.getY()) > 0) {
+                        car.priority = carTemp.priority - 1;
+                    }
+                }
+            }
+        }
+
+        // 0: go | 1: slow | 2: stop
+        var dicision;
+        var maxPri = car.priority;
+        var countMax = 0;
+        var countDup = 0;
+
+        // Moi case o nga tu
+        for (var i = 0; i < collision_ID.length; i++) {
+            let carID = collision_ID[i];
+            let carTemp = carList[carID];
+
+            let carPri = carTemp.priority;
+
+            if (carPri > maxPri) {
+                countDup = 0;
+                countMax += 1;
+                maxPri = carPri;
+            } else if ((carPri === maxPri) && (maxPri === car.priority)) {
+                countDup += 1;
+            }
+        }
+
+        // console.log(collision_ID);
+        // console.log(countMax);
+        // console.log(countDup);
+        // console.log("=================");
+
+        if (countMax === 0) {
+            
+            dicision = 0;
+            if (countDup === 0) {
+                car.penalty = 1;
+            } else {
+                car.penalty += 1;
+                car.setPri();
+            }
+
+        } else if (countMax === 1) {
+            dicision = 1;
+        } else {
+            dicision = 2;
+        }
+
+        if (car.collision === 2) {
+            dicision = 2;
+        }
+
+        // console.log(dicision);
+        if (dicision === 1) {
+            car.speed -= 0.05 * car.speed;
+            console.log("SPEED DOWN");
+        } else if (dicision === 2) {
+            car.stop()
+            console.log("STOPPPPP");
+        }
+
+        car.dicision = dicision;
 
         if (document.hidden !== pre_document) {
             pre_document = document.hidden;
@@ -374,10 +464,26 @@ class Car {
         this.turn_around = null;
 
         this.ID = null;
-        this.priority = null;
+        this.priority = 0;
 
         this.count_cross = -1;
         this.oneTime = true;
+
+        this.penalty = 1;
+        this.autoP = true;
+
+        this.collision = 0;
+        this.dicision = 0;
+
+        this.speedFactor = 0;
+    }
+
+    setPri(a = 0) {
+        if (this.autoP) {
+            this.priority = getRandomNumberInRange(this.priority + 1, this.penalty);
+        } else {
+            this.priority = a;
+        }
     }
 
     canTurn() {
@@ -443,6 +549,11 @@ class Car {
     }
 
     turnRight() {
+        if (this.status === 'around') {
+            return;
+        }
+        
+        
         this.turn = 'r';
         if (!this.signal.isTurnedOn) {
             this.signal.turnRight();
@@ -450,6 +561,10 @@ class Car {
     }
     
     turnLeft() {
+        if (this.status === 'around') {
+            return;
+        }
+
         this.turn = 'l'
         if (!this.signal.isTurnedOn) {
             this.signal.turnLeft();
@@ -531,10 +646,13 @@ class Car {
         this.updateTurn();
 
         let pos = this.marker.getLatLng();
-        let speed = this.speed / 1000 * 10;
-        let angle = this.angle * Math.PI / 180;
 
-        pos = this.L.latLng(pos.lat + -1 * Math.sin(angle) * speed, pos.lng + Math.cos(angle) * speed);
+        if (this.dicision !== 2) {
+            let speed = this.speed / 1000 * 10;
+            let angle = this.angle * Math.PI / 180;
+
+            pos = this.L.latLng(pos.lat + -1 * Math.sin(angle) * speed, pos.lng + Math.cos(angle) * speed);
+        }
 
         this.setPos(pos);
         this.signal.updatePos();
@@ -548,30 +666,49 @@ class Car {
         this.window.changeColor(this.zone, color);
     }
 
-    collisionDetect(car) {
-        var point = car.getPos();
+    collisionDetect(carList) {
+        var collision_ID = [];
+        var collision = 0;
 
-        var distance = calculateDistance(point, this.zone.getLatLng());
-        // console.log(point);
+        for (let car_ID in carList) {
+            var car = carList[car_ID];
+            var point = car.getPos();
 
-        console.log(distance);
-
-        if (distance < this.zone.getRadius() + 20 && (head_map[this.heading] + head_map[car.heading]) !== 0) {
+            if ((head_map[this.heading] + head_map[car.heading]) === 0 && !this.canTurn()) {
+                continue;
+            }
             
-            if (distance < this.zone.getRadius() / 2 + 20) {
-                this.changeColor('r');
-                // console.log("STOP");
-                return 'stop';
+            
+            var distance = calculateDistance(point, this.zone.getLatLng());
+            // console.log(point);
+
+            // console.log(distance);
+
+            if (distance < this.zone.getRadius() + 20) {
+                collision = 1;
+
+                if (distance < this.zone.getRadius() / 2) {
+                    collision = 2;
+                }
             }
 
-            this.changeColor('y');
-            // console.log("SLOW");
-            return 'slow';
-        } else {
-            // console.log("GOOO");
-            this.changeColor('g');
-            return 'go';
+            if (collision !== 0) {
+                collision_ID.push(car_ID);
+            }
         }
+
+        if (collision === 1) {
+            this.changeColor('y');
+        } else if (collision === 2) {
+            this.changeColor('r');
+        } else {
+            this.penalty = 1;
+            this.changeColor('g');
+        }
+
+        this.collision = collision;
+
+        return collision_ID;
     }
 
     turnAround() {

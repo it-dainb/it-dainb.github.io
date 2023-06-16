@@ -28,7 +28,7 @@ def handle_data():
     
     data = request.json  # Access the request data sent from the client
     # print(data)
-    if data["ID"] is None:
+    if data["ID"] is None :
         data["ID"] = str(current_id)
         
         # data["x"] , data["y"] = solve_collision(data, cars)
@@ -39,6 +39,11 @@ def handle_data():
         # print("===================================")
         # print()
         cars[data["ID"]] = data
+    elif data["ID"] not in cars:
+        cars[data["ID"]] = data
+        
+    cars[data["ID"]]["priority"] = data["priority"]
+    cars[data["ID"]]["dicision"] = data["dicision"]
     
     if not data["hidden"]:
         cars[data["ID"]] = data
@@ -70,7 +75,7 @@ def handle_data():
     for car_ID, live in cars_live.items():
         # print(car, time.time() - live)
         
-        if time.time() - live > 1:
+        if time.time() - live > 2:
             if car_ID not in remove_cars:
                 print("\tREMOVE CAR: ", car_ID)
                 remove_cars.append(car_ID)
@@ -94,6 +99,8 @@ def handle_data():
     
     # print(remove_cars)
     
+    print([car["priority"] for ID, car in cars.items()])
+    
     response = {'cars': cars_response, 'ID': data["ID"], 'Remove_car': remove_cars, 
                 'carX': cars[data["ID"]]["x"],
                 'carY': cars[data["ID"]]["y"],
@@ -105,6 +112,6 @@ def handle_data():
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=8080, threaded=True)
     print("Start server")
-    http_server = WSGIServer(('0.0.0.0', 8080), app, log=None)
+    http_server = WSGIServer(('0.0.0.0', 8090), app, log=None)
     http_server.serve_forever()
     print("End server")
