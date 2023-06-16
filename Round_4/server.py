@@ -7,9 +7,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import time
 
-# import logging
-# logging.getLogger('werkzeug').setLevel(logging.ERROR)
-# logging.getLogger('gevent').setLevel(logging.ERROR)
+import logging
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+logging.getLogger('gevent').setLevel(logging.ERROR)
 
 app = Flask(__name__)
 CORS(app, origins=['https://digitalauto.netlify.app'])
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8090))
     print("Start server on port: ", port)
 
-    # http_server = WSGIServer(('0.0.0.0', 8090), app, log=None)
-    http_server = WSGIServer(('0.0.0.0', port), app)
+    http_server = WSGIServer(('0.0.0.0', 8090), app, log=None)
+    # http_server = WSGIServer(('0.0.0.0', port), app)
     http_server.serve_forever()
     print("End server")
