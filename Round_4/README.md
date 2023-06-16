@@ -1,54 +1,23 @@
-# Abbreviations and Slangs in English
-
-A dictionary of Abbreviations and Slangs in English
+# CODERACE 2023 - Round 4
 
 ## Installation
 
-Download abbreviations.p
+Clone my repo
 
 ```bash
-git pull https://github.com/it-dainb/it-dainb.github.io.git
+git clone https://github.com/it-dainb/it-dainb.github.io.git
+cd it-dainb.github.io
+cd Round_4
 ```
 
 Install requirement library
-
 ```bash
-pip install spacy
-!python -m spacy download en_core_web_sm
+pip install -r requirements.txt
 ```
 
 ## Usage
 
-Import abbreviations_dict
-
-```python
-import pickle
-
-with open("abbreviations.p", "rb") as fb:
-  abbreviations_dict = pickle.load(fb)
-```
-Create de_slangs function
-
-```python
-import spacy
-nlp = spacy.load("en_core_web_sm")
-
-def de_slangs(text):
-
-    processed_text = []
-    for tok in nlp(text):
-        if tok in slang_dict:
-            processed_text.append(abbreviations_dict[tok.lower()])
-        else:
-            processed_text.append(tok.lower())
-    
-    return " ".join(processed_text)
-
-text = "Hi everyone. My name is Dai. I come from VN. I'm coder. ty !!!"
-de_slangs(text)
-```
-Output
-
+Start server
 ```bash
-hi everyone . my name is dai . i come from vietnam . i'm coder. thank you !!!
+python server.py
 ```
