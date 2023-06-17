@@ -146,12 +146,24 @@ async function sendData(car, box, carList, pre_document) {
             // Giam toc khi xe dang truoc speed < xe minh | xe minh speed > 0
             if (carTemp.heading === car.heading) {
                 if (car.heading === 'east' || car.heading === 'west') {
-                    if (carTemp.speed < car.speed && head_map[car.heading] * (carTemp.getX() - car.getX()) > 0) {
-                        car.priority = carTemp.priority - 1;
+                    if (car.heading === 'east') {
+                        if (carTemp.speed < car.speed && 1 * (carTemp.getX() - car.getX()) > 0) {
+                            car.priority = carTemp.priority - 1;
+                        }
+                    } else {
+                        if (carTemp.speed < car.speed && -1 * (carTemp.getX() - car.getX()) > 0) {
+                            car.priority = carTemp.priority - 1;
+                        }
                     }
                 } else {
-                    if (carTemp.speed < car.speed && head_map[car.heading] * (carTemp.getY() - car.getY()) > 0) {
-                        car.priority = carTemp.priority - 1;
+                    if (car.heading === 'north') {
+                        if (carTemp.speed < car.speed && 1 * (carTemp.getY() - car.getY()) > 0) {
+                            car.priority = carTemp.priority - 1;
+                        }
+                    } else {
+                        if (carTemp.speed < car.speed && -1 * (carTemp.getY() - car.getY()) > 0) {
+                            car.priority = carTemp.priority - 1;
+                        }
                     }
                 }
             }
@@ -192,6 +204,7 @@ async function sendData(car, box, carList, pre_document) {
             } else {
                 car.penalty += 1;
                 car.setPri();
+                window.printTerminal("SOLVE AUTO PRIORITY -> " + car.priority);
             }
 
         } else if (countMax === 1) {
@@ -200,7 +213,7 @@ async function sendData(car, box, carList, pre_document) {
             dicision = 2;
         }
 
-        if (car.collision === 2) {
+        if (car.collision === 2 && dicision !== 0) {
             dicision = 2;
         }
 
@@ -208,8 +221,18 @@ async function sendData(car, box, carList, pre_document) {
         if (dicision === 1) {
             car.speed -= 0.05 * car.speed;
             // console.log("SPEED DOWN");
+            if (car.speed < 1) {
+                car.stop();
+            }
+
+            if (car.dicision != dicision) {
+                window.printTerminal("DETECT LIGHT COLLISON -> SLOW DOWN")
+            }
         } else if (dicision === 2) {
             car.stop()
+            if (car.dicision != dicision) {
+                window.printTerminal("DETECT DANGER COLLISON -> STOP")
+            }
             // console.log("STOPPPPP");
         }
 
@@ -396,27 +419,34 @@ class TurnSignal {
     }
 }
 
-function findHeading(angle) {
-    let heading;
-    
-    if (angle % 360 == 0) {
-        heading = "east";
-    } else if (angle % 90 == 0) {
-        heading = "south";
-    } else if (angle % 180 == 0) {
-        heading = "west";
-    } else {
-        heading = "north";
+function findHeading(angle) {    
+    let normalizedAngle = ((angle % 360) + 360) % 360;
+
+    if (normalizedAngle === 0) {
+        return 'east';
     }
 
-    return heading;
+    if (normalizedAngle === 90) {
+        return 'south';
+    }
+
+    if (normalizedAngle === 180) {
+        return 'west';
+    }
+
+    if (normalizedAngle === 270) {
+        return 'north';
+    }
+
+
+
 }
 
 var head_map = {
     "east": 1,
-    "south": -1,
+    "south": -2,
     "west": -1,
-    "north": 1
+    "north": 2
 }
 
 class Box {
@@ -539,6 +569,7 @@ class Car {
 
     stop() {
         this.speed = 0;
+        window.onBreak();
     }
 
     setRotationAngle() {
@@ -556,6 +587,7 @@ class Car {
             return;
         }
         
+        this.turnOff();
         
         this.turn = 'r';
         if (!this.signal.isTurnedOn) {
@@ -567,6 +599,7 @@ class Car {
         if (this.status === 'around') {
             return;
         }
+        this.turnOff();
 
         this.turn = 'l'
         if (!this.signal.isTurnedOn) {
@@ -743,6 +776,13 @@ class Car {
 
 var car;
 
+
+function toTitleCase(str) {
+    return str.toLowerCase().replace(/(?:^|\s)\w/g, function(match) {
+            return match.toUpperCase();
+    });
+}
+
 function simulatorInit(simulator, car) {
     simulator("Vehicle.ADAS.CruiseControl.SpeedSet", "set", ({ args }) => {
         const [value] = args;
@@ -763,15 +803,7 @@ function simulatorInit(simulator, car) {
     });
 
     simulator("Vehicle.CurrentLocation.Heading", "get", () => {
-        if (car.angle === 0 || car.angle === 360) {
-            return car.angle;
-        }
-
-        if (car.angle % 360 === 0) {
-            return 360;
-        }
-
-        return car.angle % 360;
+        return toTitleCase(findHeading(car.angle));
     })
 }
 
@@ -887,7 +919,7 @@ const map = ({ widgets, simulator, vehicle }) => {
         
         box_iframe.srcdoc = iframeContent;
 
-        box_iframe.addEventListener("load", () => {        
+        box_iframe.addEventListener("load", () => {  
 
             let carMarker = box_window.carMarker;
             let mapContainer = box_window.document.getElementById("map");
@@ -930,45 +962,34 @@ const map = ({ widgets, simulator, vehicle }) => {
             
             box_window.addEventListener("resize", resizeMap);
 
-            // // Create a new Web Worker with an inline function
-            // var worker = new Worker(URL.createObjectURL(
-            //     new Blob([`
-            //     self.onmessage = function(event) {
-            //         if (event.data.type === 'start') {
-            //         startUpdates(event.data.map, event.data.canTurn, event.data.car);
-            //         }
-            //     }
-            
-            //     function startUpdates(map, canTurn, car) {
-            //         setInterval(function() {
-            //         // Perform your update logic here
-            //             // carUpdate(car, map, canTurn);
-            //         }, 10); // Update every 10 milliseconds
-            //     }
-            
-            //     function carUpdate(car, map, canTurn) {
-            //         // Perform the car.update(map) logic here using the canTurn and map variables
-            //         car.canTurn = canTurn;
-            //         car.update(map);
-
-            //         self.postMessage({ map: map, car: car }); // Notify the main script about the update and send the canTurn value
-            //     }
-            //     `], { type: 'text/javascript' })
-            // ));
-            
-            // // Listen for messages from the Web Worker
-            // worker.onmessage = function(event) {
-            //     // car = event.data.car;
-            //     // Handle the updatedCanTurn received from the Web Worker
-            //     console.log('update');
-            // };
-            
-            // // Start the updates and pass the canTurn value and map to the Web Worker
-            // worker.postMessage({ map: box_window.map, canTurn: box_window.canTurn, car: car, type: 'start' });
-        
             // Access the carMarker variable here
             setInterval(() => {
                 // console.log(box_window.canTurn);
+                car.autoP = window.autoPrior;
+
+                if (!car.autoP) {
+                    car.priority = window.priValue;
+                }
+
+                if (window.TurnClick === 'l') {
+                    car.turnLeft();
+                } else if (window.TurnClick === 'r') {
+                    car.turnRight();
+                }
+
+                if (!window.brakeClick) {
+                    let value = 20;
+                    if (window.TurnClick === 'u') {
+                        car.speed += value;
+                    } else if (window.TurnClick === 'd') {
+                        car.speed -= value;
+                    }
+                } else {
+                    car.stop();
+                }
+                
+                window.TurnClick = 's';
+
                 car.update(map);
 
                 for (let carID in carList) {

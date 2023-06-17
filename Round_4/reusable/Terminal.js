@@ -23,6 +23,8 @@ const Terminal = ({widgets}) => {
             div.querySelector(".terminal-lines").appendChild(line)
         }
 
+        window.printTerminal = print;
+
         reset = () => {
             div.querySelector(".terminal-lines").textContent = ""
         }

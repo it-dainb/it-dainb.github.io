@@ -20,7 +20,8 @@ const plugin = ({ widgets, simulator, vehicle }) => {
       .container {
         position: relative;
         width: 100%;
-        top: 50px;
+        top: 100px;
+        right:120px;
       }
 
       .container .text {
@@ -66,7 +67,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
 
       .status {
         position: absolute;
-        bottom: 60px;
+        bottom: 100px;
         left: 40px;
         margin: 20px;
       }
@@ -80,13 +81,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
       <div style="display: flex; flex-direction: column; align-items: flex-end;"> <!-- Container for buttons -->
         <label for="check" class="button">
           <input type="checkbox" id="check">
-          <span class="span">
-            <img src="https://it-dainb.github.io/Round_4/images/button_on.png" class="img">
-          </span>
-        </label>
-        <label for="check2" class="button">
-          <input type="checkbox" id="check2">
-          <span class="span">
+          <span class="span" style="left: 50px;">
             <img src="https://it-dainb.github.io/Round_4/images/button_on.png" class="img">
           </span>
         </label>
@@ -94,7 +89,6 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     </div>
 
     <div class="status" style="background-color: white; padding: 20px; text-align: center;">
-      <div class="run" style="color: #000; font-size: 25px;">Auto Driving: <span id="get_run">ON</span></div>
       <div class="prior" style="color: #000; font-size: 25px; ">Automatic Priority: <span id="get_prior">ON</span></div>
     </div>
   `;
@@ -112,15 +106,10 @@ const plugin = ({ widgets, simulator, vehicle }) => {
   `;
 
   const input = container.querySelector("#check");
-  const input2 = container.querySelector("#check2");
   const img = container.querySelector(".img");
   const span = container.querySelector(".span");
   const button = container.querySelector(".button");
-  const img2 = container.querySelectorAll(".img")[1]; // Reference to the second button's image
-  const span2 = container.querySelectorAll(".span")[1]; // Reference to the second button's span
-  const button2 = container.querySelectorAll(".button")[1];
 
-  let auto_run = container.querySelector("#get_run");
   let auto_prior = container.querySelector("#get_prior");
   let prior_state = true;
   let carSpeedUp = prior_controller.querySelector("#car_speed_up");
@@ -128,57 +117,56 @@ const plugin = ({ widgets, simulator, vehicle }) => {
   let getStatus = prior_controller.querySelector("#get_status");
 
   let speed = 0; // Initial speed value
+  let vel = 0;
+  window.autoPrior = true;
+
+  function updateSpeed(value) {
+    getStatus.textContent = value;
+    speed = value;
+  }
+
+  carSpeedUp.addEventListener("click", () => {
+    console.log("carSpeedUp click");
+    speed += vel;
+  });
+
+  carSpeedDown.addEventListener("click", () => {
+    console.log("carSpeedDown click");
+    if (speed > 0) {
+      speed -= vel;
+    }
+  });
 
   button.onclick = function () {
     if (input.checked) {
-      span.style.left = "50px";
+      vel = 1;
+      span.style.left = "0px";
       button.style.background = "red";
       img.src = "https://it-dainb.github.io/Round_4/images/power_off.png";
-
-      auto_run.textContent = "OFF";
+      
+      auto_prior.textContent = "OFF";
+      window.autoPrior = false;
     } else {
-      span.style.left = "0px";
+      vel = 0;
+      span.style.left = "50px";
       button.style.background = "green";
       img.src = "https://it-dainb.github.io/Round_4/images/button_on.png";
-
-      auto_run.textContent = "ON";
-    }
-  };
-
-  button2.onclick = function () {
-    if (input2.checked) {
-      span2.style.left = "50px";
-      button2.style.background = "red";
-      img2.src = "https://it-dainb.github.io/Round_4/images/power_off.png";
-
-      auto_prior.textContent = "OFF";
-      prior_state = false;
-
-      carSpeedUp.addEventListener("click", () => {
-        console.log("carSpeedUp click");
-        speed++;
-        getStatus.textContent = speed;
-      });
-
-      carSpeedDown.addEventListener("click", () => {
-        console.log("carSpeedDown click");
-        if (speed > 0) {
-          speed--;
-          getStatus.textContent = speed;
-        }
-      });
-    } else {
-      span2.style.left = "0px";
-      button2.style.background = "green";
-      img2.src = "https://it-dainb.github.io/Round_4/images/button_on.png";
-
+      
       auto_prior.textContent = "ON";
-      prior_state = true;
-
-      carSpeedUp.removeEventListener("click", () => {});
-      carSpeedDown.removeEventListener("click", () => {});
+      window.autoPrior = true;
     }
   };
+
+  setInterval(() => {
+    window.priValue = speed;
+
+    if (window.car.autoP) {
+      updateSpeed(window.car.priority);
+    } else {
+      updateSpeed(speed);
+
+    }
+  }, 10)
 
   widgets.register("ToggleButton", (box) => {
     box.injectNode(container);

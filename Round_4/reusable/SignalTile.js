@@ -9,6 +9,7 @@ import loadScript from "./loadScript.js"
 
 const SignalTile = (pill, vehicle) => {
     return (box) => {
+
         const div = document.createElement("div")
         const label = !!pill.label ? pill.label : pill.signal
 

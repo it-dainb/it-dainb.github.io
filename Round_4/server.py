@@ -41,7 +41,8 @@ def handle_data():
         # print("===================================")
         # print()
         cars[data["ID"]] = data
-    elif data["ID"] not in cars:
+    
+    if data["ID"] not in cars:
         cars[data["ID"]] = data
         
     cars[data["ID"]]["priority"] = data["priority"]

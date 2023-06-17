@@ -46,10 +46,6 @@
 #     print(carList)
 #     print("=============\n")
 
-x = 0
+angle = -90 * 5
 
-
-
-for _ in range(20):
-    x += x / 2 + 0.1
-    print(x)
+print(((angle % 360) + 360) % 360)

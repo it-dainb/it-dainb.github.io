@@ -1,4 +1,5 @@
-var turn, brake;
+window.brakeClick = false;
+window.TurnClick = 's';
 
 function moveVehicle(turn) {
     window.TurnClick = turn;
@@ -116,7 +117,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     if (btnUp) {
         btnUp.addEventListener("mousedown", () => {
             btnUp.classList.add("active");
-            moveVehicle("up");
+            moveVehicle("u");
         });
 
         btnUp.addEventListener("mouseup", () => {
@@ -127,7 +128,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     if (btnDown) {
         btnDown.addEventListener("mousedown", () => {
             btnDown.classList.add("active");
-            moveVehicle("down");
+            moveVehicle("d");
         });
 
         btnDown.addEventListener("mouseup", () => {
@@ -138,7 +139,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     if (btnLeft) {
         btnLeft.addEventListener("mousedown", () => {
             btnLeft.classList.add("active");
-            moveVehicle("left");
+            moveVehicle("l");
         });
 
         btnLeft.addEventListener("mouseup", () => {
@@ -149,7 +150,7 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     if (btnRight) {
         btnRight.addEventListener("mousedown", () => {
             btnRight.classList.add("active");
-            moveVehicle("right");
+            moveVehicle("r");
         });
 
         btnRight.addEventListener("mouseup", () => {
@@ -160,25 +161,57 @@ const plugin = ({ widgets, simulator, vehicle }) => {
     btnBrake2.style.opacity = "1";
     btnBrake1.style.opacity = "0";
 
-    brake = false;
-
-    if (btnBrake3) {
-        btnBrake3.addEventListener("click", () => {
-            if (mustStop) {
-                btnBrake1.style.opacity = "0";
-                btnBrake2.style.opacity = "1";
-                brake = false;
-                window.brake = brake;
-                btnBrake3.style.backgroundColor = "white";
-            } else {
-                btnBrake1.style.opacity = "1";
-                btnBrake2.style.opacity = "0";
-                brake = true;
-                window.brake = brake;
-                btnBrake3.style.backgroundColor = "#FF4040";
-            }
-        });
+    function onBreak() {
+      btnBrake1.style.opacity = "1";
+      btnBrake2.style.opacity = "0";
+      window.brakeClick = true;
+      btnBrake3.style.backgroundColor = "#FF4040";
     }
+
+    window.onBreak = onBreak;
+
+    btnBrake3.addEventListener("click", () => {
+      if (window.brakeClick) {
+          btnBrake1.style.opacity = "0";
+          btnBrake2.style.opacity = "1";
+          window.brakeClick = false;
+          btnBrake3.style.backgroundColor = "white";
+      } else {
+          btnBrake1.style.opacity = "1";
+          btnBrake2.style.opacity = "0";
+          window.brakeClick = true;
+          btnBrake3.style.backgroundColor = "#FF4040";
+      }
+  });
+
+  btnBrake2.addEventListener("click", () => {
+      if (window.brakeClick) {
+          btnBrake1.style.opacity = "0";
+          btnBrake2.style.opacity = "1";
+          window.brakeClick = false;
+          btnBrake3.style.backgroundColor = "white";
+      } else {
+          btnBrake1.style.opacity = "1";
+          btnBrake2.style.opacity = "0";
+          window.brakeClick = true;
+          btnBrake3.style.backgroundColor = "#FF4040";
+      }
+  });
+
+  btnBrake1.addEventListener("click", () => {
+    if (window.brakeClick) {
+        btnBrake1.style.opacity = "0";
+        btnBrake2.style.opacity = "1";
+        window.brakeClick = false;
+        btnBrake3.style.backgroundColor = "white";
+    } else {
+        btnBrake1.style.opacity = "1";
+        btnBrake2.style.opacity = "0";
+        window.brakeClick = true;
+        btnBrake3.style.backgroundColor = "#FF4040";
+    }
+  });
+
 
     widgets.register("Controller", (box) => {
         box.injectNode(container);

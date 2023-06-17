@@ -18,7 +18,13 @@ const plugin = ({widgets, simulator, vehicle}) => {
     const Speed = {
         signal: "Vehicle.Speed",
         label: "Speed",
-        icon: "speed"
+        icon: "gauge"
+    }
+
+    const Heading = {
+        signal: "Vehicle.CurrentLocation.Heading",
+        label: "Heading",
+        icon: "compass"
     }
 
 
@@ -65,11 +71,14 @@ const plugin = ({widgets, simulator, vehicle}) => {
             vehicle
         )
     )
-    
+
     widgets.register(
         "Speed",
-        SignalTile(
-            Speed,
+        SignalPills(
+            [   
+                Speed,
+                Heading,
+            ],
             vehicle
         )
     )
