@@ -1,6 +1,6 @@
 // var API = 'https://teamabcd.digitalauto.tech/api/data';
-var API = 'https://it-dainb-github-io.vercel.app/api/data';
-// var API = 'http://127.0.0.1:8090/api/data';
+// var API = 'https://it-dainb-github-io.vercel.app/api/data';
+var API = 'http://127.0.0.1:8090/api/data';
 
 var carList = {}; // Array to store cars
 
@@ -40,7 +40,7 @@ async function sendData(car, box, carList, pre_document) {
 
     // console.log("SEND DATA")
     try {
-        const response = await fetch("https://it-dainb-github-io.vercel.app/api/data", {
+        const response = await fetch(API, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -80,44 +80,36 @@ async function sendData(car, box, carList, pre_document) {
             //     continue;
             // }
 
-            let tempCar = null;
             if (!(car_data.ID in carList)) {
                 console.log("CREATE CAR", car_data.ID);
-                tempCar = box.createCar([car_data.y, car_data.x]);
-                carList[car_data.ID] = tempCar;
-            } else {
-                tempCar = carList[car_data.ID];
+                carList[car_data.ID] = box.createCar([car_data.y, car_data.x]);
             }
             
-            tempCar.priority = car_data.priority;
-            tempCar.dicision = car_data.dicision;
-            
-            if ((pre_document === true && document.hidden === false) || tempCar.ID === null) {
+            carList[car_data.ID].priority = car_data.priority;
+            carList[car_data.ID].dicision = car_data.dicision;
+            carList[car_data.ID].speed = car_data.speed;
+
+            if ((pre_document === true && document.hidden === false) || carList[car_data.ID].ID === null) {
                 console.log("SYNC")
                 
-                if (tempCar.ID === null) {
-                    tempCar.ID = car_data.ID;
+                if (carList[car_data.ID].ID === null) {
+                    carList[car_data.ID].ID = car_data.ID;
                 }
 
-                tempCar.setPos([car_data.y, car_data.x]);
+                carList[car_data.ID].setPos([car_data.y, car_data.x]);
     
-                tempCar.angle = car_data.angle;
-                tempCar.speed = car_data.speed;
-                tempCar.turn = car_data.turn;
+                carList[car_data.ID].angle = car_data.angle;
+                carList[car_data.ID].turn = car_data.turn;
                 
-                tempCar.setRotationAngle();
+                carList[car_data.ID].setRotationAngle();
             }
 
-            if (tempCar.turn === 's') {
-                tempCar.turnOff();
-            } else if (tempCar.turn === 'r') {
-                tempCar.turnRight();
+            if (carList[car_data.ID].turn === 's') {
+                carList[car_data.ID].turnOff();
+            } else if (carList[car_data.ID].turn === 'r') {
+                carList[car_data.ID].turnRight();
             } else {
-                tempCar.turnLeft();
-            }
-
-            if (tempCar.dicision !== 0) {
-                tempCar.speed = car_data.speed;
+                carList[car_data.ID].turnLeft();
             }
         }
 
@@ -175,14 +167,23 @@ async function sendData(car, box, carList, pre_document) {
         var countMax = 0;
         var countDup = 0;
 
+        var maxSpeed = 0;
+        
         // Moi case o nga tu
         for (var i = 0; i < collision_ID.length; i++) {
             let carID = collision_ID[i];
             let carTemp = carList[carID];
-
+            
             let carPri = carTemp.priority;
-
+            
+            // console.log(carTemp.ID);
+            // console.log(carPri);
+            // console.log(car.priority);
+            // console.log("============");
+            
+            
             if (carPri > maxPri) {
+                maxSpeed = carTemp.speed;
                 countDup = 0;
                 countMax += 1;
                 maxPri = carPri;
@@ -190,7 +191,10 @@ async function sendData(car, box, carList, pre_document) {
                 countDup += 1;
             }
         }
-
+        
+        // console.log(countMax);
+        // console.log(countDup);
+        
         // console.log(collision_ID);
         // console.log(countMax);
         // console.log(countDup);
@@ -219,10 +223,10 @@ async function sendData(car, box, carList, pre_document) {
 
         // console.log(dicision);
         if (dicision === 1) {
-            car.speed -= 0.1 * car.speed;
+            car.speed -= 0.1 * Math.abs((maxSpeed - car.speed));
             // console.log("SPEED DOWN");
-            if (car.speed < 1) {
-                car.stop();
+            if (car.speed < 0) {
+                car.speed = 0;
             }
 
             if (car.dicision != dicision) {
@@ -238,6 +242,8 @@ async function sendData(car, box, carList, pre_document) {
 
         car.dicision = dicision;
 
+        console.log(dicision);
+        console.log("@@@@@@@@@@@@@@@@@@@");
         if (document.hidden !== pre_document) {
             pre_document = document.hidden;
         }
@@ -684,12 +690,12 @@ class Car {
 
         let pos = this.marker.getLatLng();
 
-        if (this.dicision !== 2) {
-            let speed = this.speed / 1000 * 10;
-            let angle = this.angle * Math.PI / 180;
 
-            pos = this.L.latLng(pos.lat + -1 * Math.sin(angle) * speed, pos.lng + Math.cos(angle) * speed);
-        }
+        let speed = this.speed / 1000 * 10;
+        let angle = this.angle * Math.PI / 180;
+
+        pos = this.L.latLng(pos.lat + -1 * Math.sin(angle) * speed, pos.lng + Math.cos(angle) * speed);
+
 
         this.setPos(pos);
         this.signal.updatePos();
@@ -716,7 +722,7 @@ class Car {
             }
             
             
-            var distance = calculateDistance(point, this.zone.getLatLng());
+            var distance = calculateDistance(point, this.getPos());
             // console.log(point);
 
             // console.log(distance);

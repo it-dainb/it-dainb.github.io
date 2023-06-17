@@ -43,6 +43,9 @@ def handle_data():
     
     cars[data["ID"]]["priority"] = data["priority"]
     cars[data["ID"]]["dicision"] = data["dicision"]
+    cars[data["ID"]]["speed"] = data["speed"]
+    
+    # print(data["ID"], data["speed"], data["dicision"], data["priority"])
     
     if not data["hidden"]:
         cars[data["ID"]] = data
@@ -68,12 +71,14 @@ def handle_data():
             cars[car_ID]["turn"] = data["carList"][car_ID]["turn"]
             cars[car_ID]["angle"] = data["carList"][car_ID]["angle"]
             cars_live[car_ID] = time.time()
+            # print("UPDATE CAR: ", car_ID)
     
     # for key, value in cars_live.items():
+    # print(cars_live)
     cars_live[data["ID"]] = time.time()
     for car_ID, live in cars_live.items():
         # print(car, time.time() - live)
-        if time.time() - live > 2:
+        if time.time() - live > 5:
             if car_ID not in remove_cars:
                 print("\tREMOVE CAR: ", car_ID)
                 remove_cars.append(car_ID)
