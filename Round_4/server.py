@@ -93,6 +93,7 @@ def handle_data():
         if car_ID in cars_live:
             del cars_live[car_ID]
     
+    remove_cars = []
     # Process the data and prepare a response
     # print(cars)
     # print(remove_cars)
