@@ -219,7 +219,7 @@ async function sendData(car, box, carList, pre_document) {
 
         // console.log(dicision);
         if (dicision === 1) {
-            car.speed -= 0.05 * car.speed;
+            car.speed -= 0.1 * car.speed;
             // console.log("SPEED DOWN");
             if (car.speed < 1) {
                 car.stop();
@@ -724,7 +724,7 @@ class Car {
             if (distance < this.zone.getRadius() + 20) {
                 collision = 1;
 
-                if (distance < this.zone.getRadius() / 2) {
+                if (distance < this.zone.getRadius() / 2 + 20) {
                     collision = 2;
                 }
             }
