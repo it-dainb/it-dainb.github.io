@@ -22,7 +22,6 @@ old = None
 cars = {}
 cars_live = {}
 current_id = 0
-remove_cars = []
 
 @app.route('/api/data', methods=['POST'])
 def handle_data():
@@ -70,7 +69,7 @@ def handle_data():
             cars[car_ID]["turn"] = data["carList"][car_ID]["turn"]
             cars[car_ID]["angle"] = data["carList"][car_ID]["angle"]
     
-    
+    remove_cars = []
     # for key, value in cars_live.items():
     for car_ID, live in cars_live.items():
         # print(car, time.time() - live)
@@ -89,9 +88,6 @@ def handle_data():
         
         if car_ID in cars_live:
             del cars_live[car_ID]
-    
-    remove_cars = []
-    
     
     if data["ID"] not in cars:
         cars[data["ID"]] = data
