@@ -40,7 +40,7 @@ async function sendData(car, box, carList, pre_document) {
 
     // console.log("SEND DATA")
     try {
-        const response = await fetch(API, {
+        const response = await fetch("https://it-dainb-github-io.vercel.app/api/data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
