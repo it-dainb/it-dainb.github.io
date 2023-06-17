@@ -1,6 +1,6 @@
 // var API = 'https://teamabcd.digitalauto.tech/api/data';
-// var API = 'https://it-dainb-github-io.vercel.app/api/data';
-var API = 'http://127.0.0.1:8090/api/data';
+var API = 'https://it-dainb-github-io.vercel.app/api/data';
+// var API = 'http://127.0.0.1:8090/api/data';
 
 var carList = {}; // Array to store cars
 
