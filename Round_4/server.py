@@ -56,7 +56,6 @@ def handle_data():
         #     print()
         cars[data["ID"]] = data
 
-    cars_live[data["ID"]] = time.time()
     
     # print(cars_live)
     # if data["ID"] == "1":
@@ -68,12 +67,13 @@ def handle_data():
             cars[car_ID]["y"] = data["carList"][car_ID]["y"]
             cars[car_ID]["turn"] = data["carList"][car_ID]["turn"]
             cars[car_ID]["angle"] = data["carList"][car_ID]["angle"]
+            cars_live[car_ID] = time.time()
     
     # for key, value in cars_live.items():
+    cars_live[data["ID"]] = time.time()
     for car_ID, live in cars_live.items():
         # print(car, time.time() - live)
-        
-        if time.time() - live > 10:
+        if time.time() - live > 2:
             if car_ID not in remove_cars:
                 print("\tREMOVE CAR: ", car_ID)
                 remove_cars.append(car_ID)
