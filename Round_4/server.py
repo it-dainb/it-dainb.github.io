@@ -40,7 +40,10 @@ def handle_data():
         # print("===================================")
         # print()
         cars[data["ID"]] = data
-        
+    
+    if data["ID"] not in cars:
+        cars[data["ID"]] = data
+    
     cars[data["ID"]]["priority"] = data["priority"]
     cars[data["ID"]]["dicision"] = data["dicision"]
     
@@ -89,8 +92,6 @@ def handle_data():
         if car_ID in cars_live:
             del cars_live[car_ID]
     
-    if data["ID"] not in cars:
-        cars[data["ID"]] = data
     # Process the data and prepare a response
     # print(cars)
     # print(remove_cars)
@@ -101,6 +102,8 @@ def handle_data():
     # print(remove_cars)
     
     # print([car["priority"] for ID, car in cars.items()])
+    if data["ID"] not in cars:
+        cars[data["ID"]] = data
     
     response = {'cars': cars_response, 'ID': data["ID"], 'Remove_car': remove_cars, 
                 'carX': cars[data["ID"]]["x"],
