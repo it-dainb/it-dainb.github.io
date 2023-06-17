@@ -18,7 +18,7 @@ i = 0
 elapsed_time = None
 old = None
 
-
+remove_cars = []
 cars = {}
 cars_live = {}
 current_id = 0
@@ -39,9 +39,6 @@ def handle_data():
         # print(data)
         # print("===================================")
         # print()
-        cars[data["ID"]] = data
-    
-    if data["ID"] not in cars:
         cars[data["ID"]] = data
     
     cars[data["ID"]]["priority"] = data["priority"]
@@ -72,12 +69,11 @@ def handle_data():
             cars[car_ID]["turn"] = data["carList"][car_ID]["turn"]
             cars[car_ID]["angle"] = data["carList"][car_ID]["angle"]
     
-    remove_cars = []
     # for key, value in cars_live.items():
     for car_ID, live in cars_live.items():
         # print(car, time.time() - live)
         
-        if time.time() - live > 2:
+        if time.time() - live > 10:
             if car_ID not in remove_cars:
                 print("\tREMOVE CAR: ", car_ID)
                 remove_cars.append(car_ID)
@@ -102,8 +98,6 @@ def handle_data():
     # print(remove_cars)
     
     # print([car["priority"] for ID, car in cars.items()])
-    if data["ID"] not in cars:
-        cars[data["ID"]] = data
     
     response = {'cars': cars_response, 'ID': data["ID"], 'Remove_car': remove_cars, 
                 'carX': cars[data["ID"]]["x"],
